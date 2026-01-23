@@ -1,19 +1,17 @@
 package network.twink.smpcleanroom.feature.impl;
 
+import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import network.twink.smpcleanroom.feature.AbstractFeature;
 import network.twink.smpcleanroom.feature.FeatureManager;
 import network.twink.smpcleanroom.util.TwinkMapRenderer;
@@ -32,7 +30,8 @@ public class WithholdMapFeature extends AbstractFeature {
     private String worldName;
     private final Map<byte[], List<Integer>> mapDataHashes = new ConcurrentHashMap<>();
 
-    public WithholdMapFeature(FeatureManager featureManager, Plugin plugin, String worldName, List<Integer> mapIds, boolean withholdAll) {
+    public WithholdMapFeature(
+            FeatureManager featureManager, Plugin plugin, String worldName, List<Integer> mapIds, boolean withholdAll) {
         super(featureManager, plugin, "withhold_map_feature");
         this.mapIds = mapIds;
         this.worldName = worldName;
@@ -51,20 +50,32 @@ public class WithholdMapFeature extends AbstractFeature {
         if (this.withholdAll) return;
         File file = new File(worldName);
         if (!file.exists()) {
-            getPlugin().getLogger().severe("Directory " + file.getAbsoluteFile() + " doesn't exist. WithholdMapFeature will be disabled.");
+            getPlugin()
+                    .getLogger()
+                    .severe("Directory " + file.getAbsoluteFile()
+                            + " doesn't exist. WithholdMapFeature will be disabled.");
             return;
         }
         if (!file.isDirectory()) {
-            getPlugin().getLogger().severe("Directory " + file.getAbsoluteFile() + " exists, but it's not a directory. WithholdMapFeature will be disabled.");
+            getPlugin()
+                    .getLogger()
+                    .severe("Directory " + file.getAbsoluteFile()
+                            + " exists, but it's not a directory. WithholdMapFeature will be disabled.");
             return;
         }
         File dataFile = new File(worldName, "data");
         if (!dataFile.exists()) {
-            getPlugin().getLogger().severe("Directory " + file.getAbsoluteFile() + " doesn't exist. WithholdMapFeature will be disabled.");
+            getPlugin()
+                    .getLogger()
+                    .severe("Directory " + file.getAbsoluteFile()
+                            + " doesn't exist. WithholdMapFeature will be disabled.");
             return;
         }
         if (!dataFile.isDirectory()) {
-            getPlugin().getLogger().severe("Directory " + file.getAbsoluteFile() + " exists, but it's not a directory. WithholdMapFeature will be disabled.");
+            getPlugin()
+                    .getLogger()
+                    .severe("Directory " + file.getAbsoluteFile()
+                            + " exists, but it's not a directory. WithholdMapFeature will be disabled.");
             return;
         }
         getPlugin().getLogger().warning("Hashing all Map IDs. This may take a while.");
@@ -79,7 +90,9 @@ public class WithholdMapFeature extends AbstractFeature {
                 try {
                     byte[] hash = generateHashSync(mapDat);
                     synchronized (WithholdMapFeature.this) {
-                        mapDataHashes.computeIfAbsent(hash, k -> new ArrayList<>()).add(mapId);
+                        mapDataHashes
+                                .computeIfAbsent(hash, k -> new ArrayList<>())
+                                .add(mapId);
                         mapDataHashes.computeIfPresent(hash, (k, li) -> {
                             li.add(mapId);
                             return li;
@@ -91,10 +104,12 @@ public class WithholdMapFeature extends AbstractFeature {
             });
         }
         executor.shutdown();
-        while (!executor.isTerminated()) {
-        }
+        while (!executor.isTerminated()) {}
         ready = true;
-        getPlugin().getLogger().info("Got " + mapDataHashes.size() + " unique hashes out of " + dataFile.listFiles().length + " files.");
+        getPlugin()
+                .getLogger()
+                .info("Got " + mapDataHashes.size() + " unique hashes out of " + dataFile.listFiles().length
+                        + " files.");
         // TODO this doens't work because of things...
     }
 
@@ -104,8 +119,7 @@ public class WithholdMapFeature extends AbstractFeature {
     }
 
     @Override
-    public void onShutdown() {
-    }
+    public void onShutdown() {}
 
     private byte[] generateHashSync(File file) throws NoSuchAlgorithmException, IOException {
         MessageDigest md = MessageDigest.getInstance("MD5");
@@ -137,19 +151,27 @@ public class WithholdMapFeature extends AbstractFeature {
                 if (meta.hasMapView() && meta.getMapView() != null) {
                     TwinkMapRenderer renderer = new TwinkMapRenderer();
                     meta.getMapView().addRenderer(renderer);
-                    event.getEntity().getScheduler().runDelayed(getPlugin(), task -> {
-                        try {
-                            int[] arr = renderer.getPixelArr();
-                            byte[] hash = generateHashSync(arr);
-                            mapDataHashes.computeIfAbsent(hash, k -> new ArrayList<>()).add(meta.getMapId());
-                            mapDataHashes.computeIfPresent(hash, (k, li) -> {
-                                li.add(meta.getMapId());
-                                return li;
-                            });
-                        } catch (NoSuchAlgorithmException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }, null, 80L);
+                    event.getEntity()
+                            .getScheduler()
+                            .runDelayed(
+                                    getPlugin(),
+                                    task -> {
+                                        try {
+                                            int[] arr = renderer.getPixelArr();
+                                            byte[] hash = generateHashSync(arr);
+                                            mapDataHashes
+                                                    .computeIfAbsent(hash, k -> new ArrayList<>())
+                                                    .add(meta.getMapId());
+                                            mapDataHashes.computeIfPresent(hash, (k, li) -> {
+                                                li.add(meta.getMapId());
+                                                return li;
+                                            });
+                                        } catch (NoSuchAlgorithmException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    },
+                                    null,
+                                    80L);
                 }
             }
         }

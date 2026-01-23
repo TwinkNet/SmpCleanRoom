@@ -1,12 +1,11 @@
 package network.twink.smpcleanroom.util;
 
+import java.awt.Color;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 import org.jetbrains.annotations.NotNull;
-
-import java.awt.Color;
 
 public class TwinkMapRenderer extends MapRenderer {
 
