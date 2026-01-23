@@ -15,6 +15,7 @@ import com.comphenix.protocol.wrappers.nbt.NbtList;
 import io.papermc.paper.event.packet.PlayerChunkLoadEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -54,6 +55,12 @@ public class FilterSignFeature extends AbstractFeature {
                     @Override
                     public void onPacketSending(PacketEvent event) {
                         if (event.isPlayerTemporary()) return;
+                        Optional<String> str = event.getPacket().getMeta("Mr.Clean");
+                        if (str.isPresent()) {
+                            if (str.get().equals("Scrubbed")) {
+                                return;
+                            }
+                        }
                         if (!LocationUtil.isLocationInsideSpawnRadius(
                                 event.getPlayer().getLocation(), radius)) {
                             return;
@@ -63,11 +70,10 @@ public class FilterSignFeature extends AbstractFeature {
                                 .getBypassManager()
                                 .isCriteriaMet(event.getPlayer().getLocation())) return;
                         PacketContainer packet = event.getPacket();
-                        int size = packet.getStructures().size();
-                        if (size < 3) return;
-                        int action =
-                                packet.getStructures().read(1).getIntegers().read(0);
-                        if (action != 640) return;
+                        boolean flag = packet.getBlockEntityTypeModifier()
+                                .read(0)
+                                .equals(WrappedRegistrable.blockEntityType("sign"));
+                        if (!flag) return;
                         NbtCompound nbt = (NbtCompound) packet.getNbtModifier().read(0);
                         NbtCompound compoundTagFront = null;
                         List<String> newJsonsFront = new ArrayList<>();
@@ -168,6 +174,7 @@ public class FilterSignFeature extends AbstractFeature {
                     rootCompound.put(frontCompound);
                     rootCompound.put(backCompound);
                     container.getNbtModifier().write(0, rootCompound);
+                    container.setMeta("Mr. Clean", "Scrubbed");
                     protocolManager.sendServerPacket(event.getPlayer(), container);
                 }
             }
