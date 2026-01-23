@@ -7,7 +7,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class SmpCleanRoom extends JavaPlugin {
 
     private CleanRoomConfiguration configuration;
-    private BypassManager bypassManager;
     private FeatureManager featureManager;
     private final String worldDir = "world";
     private final String worldNetherDir = "world_nether";
@@ -17,10 +16,12 @@ public final class SmpCleanRoom extends JavaPlugin {
     public void onLoad() {
         this.getLogger().info("Initialising...");
         this.configuration = new CleanRoomConfiguration(this);
-        this.featureManager = new FeatureManager(this, configuration);
-        this.bypassManager = new BypassManager(this.configuration);
-        this.getLogger().info("loaded " + this.bypassManager.getTotalBypassCount() + " registered bypass.");
-        this.getLogger().info("loaded " + this.featureManager.getTotalFeatureCount() + " registered bypass.");
+        BypassManager bypassManager = new BypassManager(this, this.configuration);
+        this.featureManager = new FeatureManager(this, bypassManager, configuration);
+        this.getLogger()
+                .info("loaded " + this.featureManager.getBypassManager().getTotalBypassCount()
+                        + " registered bypasses.");
+        this.getLogger().info("loaded " + this.featureManager.getTotalFeatureCount() + " registered features.");
         featureManager.onPreStartup();
     }
 

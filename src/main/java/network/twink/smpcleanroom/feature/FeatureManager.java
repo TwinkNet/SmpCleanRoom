@@ -3,6 +3,7 @@ package network.twink.smpcleanroom.feature;
 import java.util.ArrayList;
 import java.util.List;
 import network.twink.smpcleanroom.CleanRoomConfiguration;
+import network.twink.smpcleanroom.bypass.BypassManager;
 import network.twink.smpcleanroom.feature.impl.FilterSignFeature;
 import network.twink.smpcleanroom.feature.impl.WithholdMapFeature;
 import network.twink.smpcleanroom.util.yml.YMLParser;
@@ -13,10 +14,12 @@ public class FeatureManager {
     private static final String FEATURES_ = "features.";
     private static final String VALUES_ = "values.";
     private final List<IFeature> featureRegistry;
+    private final BypassManager bypassManager;
 
-    public FeatureManager(Plugin plugin, CleanRoomConfiguration config) {
+    public FeatureManager(Plugin plugin, BypassManager bypassManager, CleanRoomConfiguration config) {
         if (!config.isLoaded()) throw new IllegalStateException("CleanRoomConfiguration must be loaded.");
         YMLParser parser = config.getParser();
+        this.bypassManager = bypassManager;
         int radius = parser.getInt(VALUES_ + ".spawn_radius", 5000);
         featureRegistry = new ArrayList<>();
         if (parser.getBoolean(FEATURES_ + ".withhold_map_feature.enabled", true)) {
@@ -27,7 +30,7 @@ public class FeatureManager {
             }
             boolean withHoldAll = parser.getBoolean(FEATURES_ + ".withhold_map_feature.withhold_all_maps", true);
             String worldName = parser.getString(VALUES_ + ".overworld_dir_name", "world");
-            featureRegistry.add(new WithholdMapFeature(plugin, defaultMapIdBanList, withHoldAll));
+            featureRegistry.add(new WithholdMapFeature(this, plugin, defaultMapIdBanList, withHoldAll));
         }
         if (parser.getBoolean(FEATURES_ + ".filter_sign_feature.enabled", true)) {
             List<String> defaultBannedWords = new ArrayList<>();
@@ -36,7 +39,7 @@ public class FeatureManager {
             if (parser.exists(key) && parser.isList(key)) {
                 defaultBannedWords = parser.getStringList(key);
             }
-            featureRegistry.add(new FilterSignFeature(plugin, defaultBannedWords, radius));
+            featureRegistry.add(new FilterSignFeature(this, plugin, defaultBannedWords, radius));
         }
     }
 
@@ -60,5 +63,9 @@ public class FeatureManager {
 
     public int getTotalFeatureCount() {
         return featureRegistry.size();
+    }
+
+    public BypassManager getBypassManager() {
+        return bypassManager;
     }
 }

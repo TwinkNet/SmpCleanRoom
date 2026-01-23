@@ -7,16 +7,21 @@ import network.twink.smpcleanroom.bypass.impl.JoinDateBypass;
 import network.twink.smpcleanroom.bypass.impl.PermissionBypass;
 import network.twink.smpcleanroom.bypass.impl.PlaytimeBypass;
 import network.twink.smpcleanroom.util.yml.YMLParser;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 public class BypassManager {
 
     private static final String BYPASSES_ = "bypasses.";
-    private final List<IPlayerBypass> bypassRegistry;
+    private final List<IBypass> bypassRegistry;
+    private final Plugin plugin;
     private final Mode mode;
 
-    public BypassManager(CleanRoomConfiguration config) {
+    public BypassManager(Plugin plugin, CleanRoomConfiguration config) {
         if (!config.isLoaded()) throw new IllegalStateException("CleanRoomConfiguration must be loaded.");
         YMLParser parser = config.getParser();
+        this.plugin = plugin;
         bypassRegistry = new ArrayList<>();
         if (parser.getBoolean(BYPASSES_ + "first_join.enabled", false)) {
             long criteriaMs = parser.getLong(BYPASSES_ + "first_join.joindate_timestamp_ms");
@@ -33,8 +38,50 @@ public class BypassManager {
         mode = Mode.valueOf(parser.getString(BYPASSES_ + "mode").toUpperCase());
     }
 
-    public List<IPlayerBypass> getBypassRegistryCopy() {
+    public List<IBypass> getBypassRegistryCopy() {
         return new ArrayList<>(bypassRegistry);
+    }
+
+    public boolean isCriteriaMet(Player player) {
+        if (mode == Mode.ALL) {
+            PermanentBool bool = new PermanentBool();
+            for (IBypass iBypass : bypassRegistry) {
+                if (iBypass instanceof IPlayerBypass iPlayerBypass) {
+                    boolean flag = iPlayerBypass.isCriteriaMet(getPlugin(), player);
+                    bool.setFlag(flag, iBypass.isImmune());
+                }
+            }
+            return bool.getFlag();
+        } else {
+            boolean flag = false;
+            for (IBypass iBypass : bypassRegistry) {
+                if (iBypass instanceof IPlayerBypass iPlayerBypass) {
+                    flag = iPlayerBypass.isCriteriaMet(getPlugin(), player);
+                }
+            }
+            return flag;
+        }
+    }
+
+    public boolean isCriteriaMet(Location loc) {
+        if (mode == Mode.ALL) {
+            PermanentBool bool = new PermanentBool();
+            for (IBypass iBypass : bypassRegistry) {
+                if (iBypass instanceof ILocationBypass iLocationBypass) {
+                    boolean flag = iLocationBypass.isCriteriaMet(getPlugin(), loc);
+                    bool.setFlag(flag, iBypass.isImmune());
+                }
+            }
+            return bool.getFlag();
+        } else {
+            boolean flag = false;
+            for (IBypass iBypass : bypassRegistry) {
+                if (iBypass instanceof ILocationBypass iLocationBypass) {
+                    flag = iLocationBypass.isCriteriaMet(getPlugin(), loc);
+                }
+            }
+            return flag;
+        }
     }
 
     public int getTotalBypassCount() {
@@ -43,5 +90,35 @@ public class BypassManager {
 
     public Mode getMode() {
         return mode;
+    }
+
+    public Plugin getPlugin() {
+        return plugin;
+    }
+
+    private static class PermanentBool {
+        private boolean flag;
+        private boolean locked;
+
+        public PermanentBool() {
+            this.flag = false;
+            this.locked = false;
+        }
+
+        public void setFlag(boolean flag, boolean bypass) {
+            if (locked && !bypass) return;
+            this.flag = flag;
+            if (!flag && !bypass) {
+                locked = true;
+            }
+        }
+
+        public void setFlag(boolean flag) {
+            setFlag(flag, false);
+        }
+
+        public boolean getFlag() {
+            return flag;
+        }
     }
 }

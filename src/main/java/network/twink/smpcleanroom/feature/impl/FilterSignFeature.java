@@ -20,6 +20,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import network.twink.smpcleanroom.feature.AbstractFeature;
+import network.twink.smpcleanroom.feature.FeatureManager;
 import network.twink.smpcleanroom.util.LocationUtil;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
@@ -35,8 +36,8 @@ public class FilterSignFeature extends AbstractFeature {
     private final List<String> bannedWords;
     private int radius;
 
-    public FilterSignFeature(Plugin plugin, List<String> bannedWords, int radius) {
-        super(plugin, "filter_sign_feature");
+    public FilterSignFeature(FeatureManager featureManager, Plugin plugin, List<String> bannedWords, int radius) {
+        super(featureManager, plugin, "filter_sign_feature");
         this.bannedWords = bannedWords;
         this.radius = radius;
     }
@@ -57,6 +58,10 @@ public class FilterSignFeature extends AbstractFeature {
                                 event.getPlayer().getLocation(), radius)) {
                             return;
                         }
+                        if (getFeatureManager().getBypassManager().isCriteriaMet(event.getPlayer())) return;
+                        if (getFeatureManager()
+                                .getBypassManager()
+                                .isCriteriaMet(event.getPlayer().getLocation())) return;
                         PacketContainer packet = event.getPacket();
                         int size = packet.getStructures().size();
                         if (size < 3) return;
