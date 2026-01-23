@@ -30,7 +30,7 @@ public class FeatureManager {
             }
             boolean withHoldAll = parser.getBoolean(FEATURES_ + "withhold_map_feature.withhold_all_maps", true);
             String worldName = parser.getString(VALUES_ + "overworld_dir_name", "world");
-            featureRegistry.add(new WithholdMapFeature(this, plugin, defaultMapIdBanList, withHoldAll));
+            featureRegistry.add(new WithholdMapFeature(this, plugin, worldName, defaultMapIdBanList, withHoldAll));
         }
         if (parser.getBoolean(FEATURES_ + "filter_sign_feature.enabled", true)) {
             List<String> defaultBannedWords = new ArrayList<>();
