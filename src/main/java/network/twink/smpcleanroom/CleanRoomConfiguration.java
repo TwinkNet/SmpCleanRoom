@@ -7,8 +7,6 @@ import org.bukkit.plugin.Plugin;
 public class CleanRoomConfiguration {
 
     private static final int CONFIG_LATEST_VER = 0;
-    private static final String VALUES_ = "values.";
-    private static final String FEATURES_ = "features.";
 
     private File file;
     private YMLParser parser;
@@ -61,46 +59,4 @@ public class CleanRoomConfiguration {
     public boolean isLoaded() {
         return loaded;
     }
-
-    //    public void populateConfiguration(YMLParser parser) {
-    //        List<String> defaultBannedWords = new ArrayList<>();
-    //        defaultBannedWords.add("error");
-    //        if (parser.isList(VALUES_ + "banned_words")) {
-    //            defaultBannedWords = parser.getStringList(VALUES_ + "banned_words");
-    //        }
-    //        List<Integer> defaultWithheldMaps = new ArrayList<>();
-    //        if (parser.isList(FEATURES_ + "withhold_map_feature.withheld_maps")) {
-    //            defaultWithheldMaps = parser.getIntegerList(FEATURES_ + "withhold_map_feature.withheld_maps");
-    //        }
-    //        final String worldDirName = parser.getString(VALUES_ + "world_dir_name");
-    //        final boolean enableWithholdMapFeature = parser.getBoolean(FEATURES_ + "withhold_map_feature.enabled");
-    //        final boolean enableFilterSignFeature = parser.getBoolean(FEATURES_ + "filter_sign_feature.enabled");
-    //        final boolean withholdAllMaps = parser.getBoolean(FEATURES_ + "withhold_map_feature.withhold_all_maps");
-    //        this.values = new Values(defaultBannedWords, defaultWithheldMaps, worldDirName, enableWithholdMapFeature,
-    // enableFilterSignFeature, withholdAllMaps);
-    //    }
-
-    //    public static class Values {
-    //        public final String worldDirName;
-    //        public final List<String> bannedWords;
-    //        public final List<Integer> withheldMaps;
-    //        public final boolean enableWithholdMapFeature;
-    //        public final boolean withholdAllMaps;
-    //        public final boolean enableFilterSignFeature;
-    //
-    //        protected Values(
-    //                List<String> bannedWords,
-    //                List<Integer> withheldMaps,
-    //                String worldDirName,
-    //                boolean enableWithholdMapFeature,
-    //                boolean enableFilterSignFeature,
-    //                boolean withholdAllMaps) {
-    //            this.bannedWords = bannedWords;
-    //            this.withheldMaps = withheldMaps;
-    //            this.worldDirName = worldDirName;
-    //            this.enableWithholdMapFeature = enableWithholdMapFeature;
-    //            this.enableFilterSignFeature = enableFilterSignFeature;
-    //            this.withholdAllMaps = withholdAllMaps;
-    //        }
-    //    }
 }

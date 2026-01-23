@@ -8,9 +8,6 @@ public final class SmpCleanRoom extends JavaPlugin {
 
     private CleanRoomConfiguration configuration;
     private FeatureManager featureManager;
-    private final String worldDir = "world";
-    private final String worldNetherDir = "world_nether";
-    private final String worldEndDir = "world_the_end";
 
     @Override
     public void onLoad() {
