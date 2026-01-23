@@ -69,30 +69,50 @@ public class FilterSignFeature extends AbstractFeature {
                                 packet.getStructures().read(1).getIntegers().read(0);
                         if (action != 640) return;
                         NbtCompound nbt = (NbtCompound) packet.getNbtModifier().read(0);
-                        NbtCompound compoundTag = null;
+                        NbtCompound compoundTagFront = null;
+                        List<String> newJsonsFront = new ArrayList<>();
+                        List<String> newJsonsBack = new ArrayList<>();
+                        NbtCompound compoundTagBack = null;
                         if (nbt.containsKey("front_text")) {
-                            compoundTag = nbt.getCompound("front_text");
-                        } else if (nbt.containsKey("back_text")) {
-                            compoundTag = nbt.getCompound("back_text");
+                            compoundTagFront = nbt.getCompound("front_text");
                         }
-                        if (compoundTag == null) return;
-                        NbtList<String> jsonMessages = compoundTag.getList("messages");
-                        List<String> newJsons = new ArrayList<>();
-                        for (String json : jsonMessages) {
-                            Component component = JSONComponentSerializer.json().deserialize(json);
-                            if (component instanceof TextComponent textComponent) {
+                        if (nbt.containsKey("back_text")) {
+                            compoundTagBack = nbt.getCompound("back_text");
+                        }
+                        if (compoundTagFront != null) {
+                            NbtList<String> jsonMessages = compoundTagFront.getList("messages");
+                            for (String json : jsonMessages) {
+                                Component component =
+                                        JSONComponentSerializer.json().deserialize(json);
                                 for (String bannedWord : bannedWords) {
-                                    component = textComponent.replaceText(builder -> {
+                                    component = component.replaceText(builder -> {
                                         builder.match(Pattern.compile("(?i)\\b" + Pattern.quote(bannedWord) + "\\b"));
                                         builder.replacement("?");
                                     });
                                 }
+                                newJsonsFront.add(JSONComponentSerializer.json().serialize(component));
                             }
-                            newJsons.add(JSONComponentSerializer.json().serialize(component));
+                            NbtList<String> newComponentsFront = NbtFactory.ofList("messages", newJsonsFront);
+                            compoundTagFront.put(newComponentsFront);
+                            nbt.put(compoundTagFront.getName(), compoundTagFront);
                         }
-                        NbtList<String> newComponents = NbtFactory.ofList("messages", newJsons);
-                        compoundTag.put(newComponents);
-                        nbt.put(compoundTag.getName(), compoundTag);
+                        if (compoundTagBack != null) {
+                            NbtList<String> jsonMessages = compoundTagBack.getList("messages");
+                            for (String json : jsonMessages) {
+                                Component component =
+                                        JSONComponentSerializer.json().deserialize(json);
+                                for (String bannedWord : bannedWords) {
+                                    component = component.replaceText(builder -> {
+                                        builder.match(Pattern.compile("(?i)\\b" + Pattern.quote(bannedWord) + "\\b"));
+                                        builder.replacement("?");
+                                    });
+                                }
+                                newJsonsBack.add(JSONComponentSerializer.json().serialize(component));
+                            }
+                            NbtList<String> newComponentsBack = NbtFactory.ofList("messages", newJsonsBack);
+                            compoundTagBack.put(newComponentsBack);
+                            nbt.put(compoundTagBack.getName(), compoundTagBack);
+                        }
                         packet.getNbtModifier().write(0, nbt);
                     }
                 });
@@ -114,26 +134,24 @@ public class FilterSignFeature extends AbstractFeature {
                         Component component = signSide.lines().get(i);
                         if (component instanceof TextComponent textComponent) {
                             for (String bannedWord : bannedWords) {
-                                Component nComponent = textComponent.replaceText(builder -> {
+                                component = textComponent.replaceText(builder -> {
                                     builder.match("\\b" + bannedWord + "\\b");
                                     builder.replacement("?");
                                 });
-                                frontSide.add(JSONComponentSerializer.json().serialize(nComponent));
                             }
+                            frontSide.add(JSONComponentSerializer.json().serialize(component));
                         }
                     }
                     signSide = sign.getSide(Side.BACK);
                     for (int i = 0; i < signSide.lines().size(); i++) {
                         Component component = signSide.lines().get(i);
-                        if (component instanceof TextComponent textComponent) {
-                            for (String bannedWord : bannedWords) {
-                                Component nComponent = textComponent.replaceText(builder -> {
-                                    builder.match("\\b" + bannedWord + "\\b");
-                                    builder.replacement("?");
-                                });
-                                backSide.add(JSONComponentSerializer.json().serialize(nComponent));
-                            }
+                        for (String bannedWord : bannedWords) {
+                            component = component.replaceText(builder -> {
+                                builder.match(Pattern.compile("(?i)\\b" + Pattern.quote(bannedWord) + "\\b"));
+                                builder.replacement("?");
+                            });
                         }
+                        backSide.add(JSONComponentSerializer.json().serialize(component));
                     }
                     PacketContainer container = new PacketContainer(PacketType.Play.Server.TILE_ENTITY_DATA);
                     BlockPosition pos = new BlockPosition(sign.getX(), sign.getY(), sign.getZ());

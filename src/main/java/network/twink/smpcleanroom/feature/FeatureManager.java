@@ -20,23 +20,23 @@ public class FeatureManager {
         if (!config.isLoaded()) throw new IllegalStateException("CleanRoomConfiguration must be loaded.");
         YMLParser parser = config.getParser();
         this.bypassManager = bypassManager;
-        int radius = parser.getInt(VALUES_ + ".spawn_radius", 5000);
+        int radius = parser.getInt(VALUES_ + "spawn_radius", 5000);
         featureRegistry = new ArrayList<>();
-        if (parser.getBoolean(FEATURES_ + ".withhold_map_feature.enabled", true)) {
+        if (parser.getBoolean(FEATURES_ + "withhold_map_feature.enabled", true)) {
             List<Integer> defaultMapIdBanList = new ArrayList<>();
-            final String key = FEATURES_ + ".withhold_map_feature.withheld_maps";
-            if (parser.exists(key) && parser.isList(key)) {
+            final String key = FEATURES_ + "withhold_map_feature.withheld_maps";
+            if (parser.exists(key)) {
                 defaultMapIdBanList = parser.getIntegerList(key);
             }
-            boolean withHoldAll = parser.getBoolean(FEATURES_ + ".withhold_map_feature.withhold_all_maps", true);
-            String worldName = parser.getString(VALUES_ + ".overworld_dir_name", "world");
+            boolean withHoldAll = parser.getBoolean(FEATURES_ + "withhold_map_feature.withhold_all_maps", true);
+            String worldName = parser.getString(VALUES_ + "overworld_dir_name", "world");
             featureRegistry.add(new WithholdMapFeature(this, plugin, defaultMapIdBanList, withHoldAll));
         }
-        if (parser.getBoolean(FEATURES_ + ".filter_sign_feature.enabled", true)) {
+        if (parser.getBoolean(FEATURES_ + "filter_sign_feature.enabled", true)) {
             List<String> defaultBannedWords = new ArrayList<>();
             defaultBannedWords.add("error");
-            final String key = VALUES_ + ".banned_words";
-            if (parser.exists(key) && parser.isList(key)) {
+            final String key = VALUES_ + "banned_words";
+            if (parser.exists(key)) {
                 defaultBannedWords = parser.getStringList(key);
             }
             featureRegistry.add(new FilterSignFeature(this, plugin, defaultBannedWords, radius));
