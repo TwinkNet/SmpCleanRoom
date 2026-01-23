@@ -1,0 +1,42 @@
+version: 0
+features:
+  withhold_map_feature:
+    # The Map IDs specified in the withheld_maps list will not be rendered to players who are within the prescribed spawn radius.
+    # Additionally, setting withhold_all_maps to true will not render any maps to players within the prescribed spawn radius.
+    # If bypasses are enabled, players who meet the prescribed conditions will not be affected by this feature.
+    enabled: true
+    withheld_maps: # A list of map IDs to withhold if they are placed within the prescribed spawn radius.
+      - 1234 # map_1234.dat
+      - 3210
+    withhold_all_maps: false # You can optionally choose to withhold every map within the prescribed spawn radius.
+  filter_sign_feature:
+    enabled: true
+bypasses:
+  # Valid options are "all" and "one"
+  # These features will not be applied to an account that meets all or one of the criteria
+  # The permission bypass, when enabled, will not observe the "all" rule.
+  mode: "one"
+  first_join:
+    joindate_timestamp_ms: 1464760800000 # 1 June, 2016
+    enabled: true
+  total_playtime:
+    playtime_ticks: 631139040 # 1 year in ticks
+    enabled: true
+  permission:
+    perm: "cleanroom.bypass"
+    enabled: true
+values:
+  overworld_dir_name: "world" # The name of the directory that contains your overworld.
+  spawn_radius: 10000 # blocks from 0,0 in all worlds where enabled features will act within. This should be a value that you don't expect tourists to travel beyond.
+  banned_words:
+    - "dick"
+    - "dicks"
+    - "dicking"
+    - "dicked"
+    - "faggot"
+    - "faggots"
+    - "faggotry"
+    - "rape"
+    - "rapist"
+    - "raping"
+    - "raped"
