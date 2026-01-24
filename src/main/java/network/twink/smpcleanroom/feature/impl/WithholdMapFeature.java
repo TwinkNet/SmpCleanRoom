@@ -57,15 +57,18 @@ public class WithholdMapFeature extends AbstractFeature {
                             public void onPacketSending(PacketEvent pck) {
                                 if (!LocationUtil.isLocationInsideSpawnRadius(
                                         pck.getPlayer().getLocation(), radius)) {
-                                    return; // Don't redact the map for this player if they're not within from the configured spawn radius
+                                    return; // Don't redact the map for this player if they're not within from the
+                                    // configured spawn radius
                                 }
                                 if (getFeatureManager().getBypassManager().isCriteriaMet(pck.getPlayer())) {
-                                    return; // Don't redact the map for this player if they meet any of the criteria of the configurable Bypass rules.
+                                    return; // Don't redact the map for this player if they meet any of the criteria of
+                                    // the configurable Bypass rules.
                                 }
                                 if (getFeatureManager()
                                         .getBypassManager()
                                         .isCriteriaMet(pck.getPlayer().getLocation())) {
-                                    return; // Don't redact the map for this player if their location meets any of the criteria of the configurable Bypass rules.
+                                    return; // Don't redact the map for this player if their location meets any of the
+                                    // criteria of the configurable Bypass rules.
                                 }
                                 if (withholdAll) {
                                     pck.setCancelled(true); // Very strict. Just don't allow anything.
@@ -77,7 +80,8 @@ public class WithholdMapFeature extends AbstractFeature {
                                         .getIntegers()
                                         .read(0);
                                 if (lockedPassedIdCache.get(mapId) != null && lockedPassedIdCache.get(mapId)) {
-                                    return; // Map has already been checked, it is not banned, and it can't change because it is locked.
+                                    return; // Map has already been checked, it is not banned, and it can't change
+                                    // because it is locked.
                                 }
                                 if (bannedMapIdCache.get(mapId) != null && bannedMapIdCache.get(mapId)) {
                                     pck.setCancelled(true);
@@ -88,9 +92,9 @@ public class WithholdMapFeature extends AbstractFeature {
                                 pck.getPlayer()
                                         .getScheduler()
                                         .run(getPlugin(), getMapAnalyseSyncTask(pck, mapId), null);
-
                             }
-                        }).start();
+                        })
+                .start();
     }
 
     private @NonNull Consumer<ScheduledTask> getMapAnalyseSyncTask(PacketEvent event, int mapId) {
