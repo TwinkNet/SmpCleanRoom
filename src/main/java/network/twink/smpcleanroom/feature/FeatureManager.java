@@ -23,10 +23,10 @@ public class FeatureManager {
         int radius = parser.getInt(VALUES_ + "spawn_radius", 5000);
         featureRegistry = new ArrayList<>();
         if (parser.getBoolean(FEATURES_ + "withhold_map_feature.enabled", true)) {
-            List<Integer> defaultMapIdBanList = new ArrayList<>();
+            List<String> defaultMapIdBanList = new ArrayList<>();
             final String key = FEATURES_ + "withhold_map_feature.withheld_maps";
             if (parser.exists(key)) {
-                defaultMapIdBanList = parser.getIntegerList(key);
+                defaultMapIdBanList = parser.getStringList(key);
             }
             boolean withHoldAll = parser.getBoolean(FEATURES_ + "withhold_map_feature.withhold_all_maps", true);
             String worldName = parser.getString(VALUES_ + "overworld_dir_name", "world");
