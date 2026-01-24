@@ -46,18 +46,14 @@ public class BypassManager {
         if (mode == Mode.ALL) {
             PermanentBool bool = new PermanentBool();
             for (IBypass iBypass : bypassRegistry) {
-                if (iBypass instanceof IPlayerBypass iPlayerBypass) {
-                    boolean flag = iPlayerBypass.isCriteriaMet(getPlugin(), player);
-                    bool.setFlag(flag, iBypass.isImmune());
-                }
+                boolean flag = iBypass.isCriteriaMet(getPlugin(), player);
+                bool.setFlag(flag, iBypass.isImmune());
             }
             return bool.getFlag();
         } else {
             boolean flag = false;
             for (IBypass iBypass : bypassRegistry) {
-                if (iBypass instanceof IPlayerBypass iPlayerBypass) {
-                    flag = iPlayerBypass.isCriteriaMet(getPlugin(), player);
-                }
+                flag = iBypass.isCriteriaMet(getPlugin(), player);
             }
             return flag;
         }
@@ -67,18 +63,14 @@ public class BypassManager {
         if (mode == Mode.ALL) {
             PermanentBool bool = new PermanentBool();
             for (IBypass iBypass : bypassRegistry) {
-                if (iBypass instanceof ILocationBypass iLocationBypass) {
-                    boolean flag = iLocationBypass.isCriteriaMet(getPlugin(), loc);
-                    bool.setFlag(flag, iBypass.isImmune());
-                }
+                boolean flag = iBypass.isCriteriaMet(getPlugin(), loc);
+                bool.setFlag(flag, iBypass.isImmune());
             }
             return bool.getFlag();
         } else {
             boolean flag = false;
             for (IBypass iBypass : bypassRegistry) {
-                if (iBypass instanceof ILocationBypass iLocationBypass) {
-                    flag = iLocationBypass.isCriteriaMet(getPlugin(), loc);
-                }
+                flag = iBypass.isCriteriaMet(getPlugin(), loc);
             }
             return flag;
         }

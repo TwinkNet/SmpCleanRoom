@@ -1,11 +1,10 @@
 package network.twink.smpcleanroom.bypass.impl;
 
 import network.twink.smpcleanroom.bypass.AbstractBypass;
-import network.twink.smpcleanroom.bypass.IPlayerBypass;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class PermissionBypass extends AbstractBypass implements IPlayerBypass {
+public class PermissionBypass extends AbstractBypass {
 
     private final String bypassPermission;
 
