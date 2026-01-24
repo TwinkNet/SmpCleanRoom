@@ -6,8 +6,8 @@ features:
     # If bypasses are enabled, players who meet the prescribed conditions will not be affected by this feature.
     enabled: true
     withheld_maps: # A list of map IDs to withhold if they are placed within the prescribed spawn radius.
-      - 1234 # map_1234.dat
-      - 3210
+      - "20D0AAE318649F10AC5860230CA0DA5F" # An MD5 hash of the contents of a map
+      - "BA1251263DE319076A6EB1E12EE33FCB" # Obtainable in-game by holding a map and running /hash
     withhold_all_maps: false # You can optionally choose to withhold every map within the prescribed spawn radius.
   filter_sign_feature:
     enabled: true
