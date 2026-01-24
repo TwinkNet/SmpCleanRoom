@@ -30,7 +30,6 @@ public class WithholdMapFeature extends AbstractFeature {
     private final int radius;
     private final boolean withholdAll;
     private final List<String> bannedHashes;
-    //              md5 hash, list of map ids
     private final Map<Integer, Boolean> bannedMapIdCache = new ConcurrentHashMap<>();
     private final Map<Integer, Boolean> lockedPassedIdCache = new ConcurrentHashMap<>();
 
