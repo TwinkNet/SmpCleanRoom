@@ -27,11 +27,12 @@ public class WithholdMapFeature extends AbstractFeature {
 
     private ProtocolManager protocolManager;
 
-    private int radius;
+    private final int radius;
     private final boolean withholdAll;
     private final List<String> bannedHashes;
     //              md5 hash, list of map ids
     private final Map<Integer, Boolean> bannedMapIdCache = new ConcurrentHashMap<>();
+    private final Map<Integer, Boolean> lockedPassedIdCache = new ConcurrentHashMap<>();
 
     public WithholdMapFeature(
             FeatureManager featureManager, Plugin plugin, int radius, List<String> bannedHashes, boolean withholdAll) {
@@ -57,18 +58,18 @@ public class WithholdMapFeature extends AbstractFeature {
                             public void onPacketSending(PacketEvent pck) {
                                 if (!LocationUtil.isLocationInsideSpawnRadius(
                                         pck.getPlayer().getLocation(), radius)) {
-                                    return;
+                                    return; // Don't redact the map for this player if they're not within from the configured spawn radius
                                 }
                                 if (getFeatureManager().getBypassManager().isCriteriaMet(pck.getPlayer())) {
-                                    return;
+                                    return; // Don't redact the map for this player if they meet any of the criteria of the configurable Bypass rules.
                                 }
                                 if (getFeatureManager()
                                         .getBypassManager()
                                         .isCriteriaMet(pck.getPlayer().getLocation())) {
-                                    return;
+                                    return; // Don't redact the map for this player if their location meets any of the criteria of the configurable Bypass rules.
                                 }
                                 if (withholdAll) {
-                                    pck.setCancelled(true);
+                                    pck.setCancelled(true); // Very strict. Just don't allow anything.
                                     return;
                                 }
                                 int mapId = pck.getPacket()
@@ -76,17 +77,21 @@ public class WithholdMapFeature extends AbstractFeature {
                                         .read(0)
                                         .getIntegers()
                                         .read(0);
+                                if (lockedPassedIdCache.get(mapId) != null && lockedPassedIdCache.get(mapId)) {
+                                    return; // Map has already been checked, it is not banned, and it can't change because it is locked.
+                                }
                                 if (bannedMapIdCache.get(mapId) != null && bannedMapIdCache.get(mapId)) {
                                     pck.setCancelled(true);
-                                    return;
+                                    return; // The map has already been checked and it's banned.
                                 }
                                 pck.getAsyncMarker().incrementProcessingDelay();
+                                // The packet will be delayed at minimum 21 ticks for further inspection.
                                 pck.getPlayer()
                                         .getScheduler()
                                         .run(getPlugin(), getMapAnalyseSyncTask(pck, mapId), null);
+
                             }
-                        })
-                .start();
+                        }).start();
     }
 
     private @NonNull Consumer<ScheduledTask> getMapAnalyseSyncTask(PacketEvent event, int mapId) {
@@ -116,6 +121,8 @@ public class WithholdMapFeature extends AbstractFeature {
                                     if (bannedHashes.contains(hash)) {
                                         bannedMapIdCache.put(meta.getMapId(), true);
                                         event.setCancelled(true);
+                                    } else if (meta.getMapView().isLocked()) {
+                                        lockedPassedIdCache.put(meta.getMapId(), true);
                                     }
                                 } catch (NoSuchAlgorithmException ignored) {
                                 }
