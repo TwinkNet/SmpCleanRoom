@@ -298,6 +298,8 @@ public class WithholdMapFeature extends AbstractFeature {
                             parser.save();
                         }
                         sender.sendMessage("\2477" + hash + " is now \247aallowed\2477.");
+                        feature.bannedMapIdCache.clear();
+                        feature.lockedPassedIdCache.clear();
                         return true;
                     }
                     synchronized (feature.bannedHashes) {
@@ -307,6 +309,8 @@ public class WithholdMapFeature extends AbstractFeature {
                         parser.save();
                     }
                     sender.sendMessage("\2477" + hash + " is now \2474banned\2477.");
+                    feature.bannedMapIdCache.clear();
+                    feature.lockedPassedIdCache.clear();
                     return true;
                 } else {
                     sender.sendMessage("\2474This command isn't registered to SmpCleanRoom. You are a skid.");
