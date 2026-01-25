@@ -1,7 +1,8 @@
 # CompliantCleanRoom
 
 ## Download (for Folia 1.21.x)
-Almost there... Just a few hours?
+[Pre-Release TEST-1 is out!](https://github.com/TwinkNet/SmpCleanRoom/releases/tag/TEST-1)
+This pre-release is still very unpolished, and the configuration is not very well documented, however, functionally, it works. If there are any severe issues that should be addressed (e.g. crashes, unexpected behaviour), you can make an Issue if you catch it before I do.
 
 I do not intend to target non-Folia Paper at this time unless there is a demand. You should be using Folia over Paper if you run a server like this.
 
