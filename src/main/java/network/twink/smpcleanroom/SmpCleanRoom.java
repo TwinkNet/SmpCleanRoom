@@ -31,4 +31,8 @@ public final class SmpCleanRoom extends JavaPlugin {
     public void onDisable() {
         featureManager.onShutdown();
     }
+
+    public CleanRoomConfiguration getConfiguration() {
+        return configuration;
+    }
 }
