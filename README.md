@@ -1,7 +1,7 @@
 # SMP Clean Room (Anarchy Clean Room?)
 
 ## Download (for Folia 1.21.x)
-It's not done yet. Give me a few days.
+Almost there... Just a few hours?
 
 I do not intend to target non-Folia Paper at this time unless there is a demand. You should be using Folia over Paper if you run a server like this.
 
