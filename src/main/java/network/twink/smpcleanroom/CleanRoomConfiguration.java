@@ -1,12 +1,13 @@
 package network.twink.smpcleanroom;
 
-import java.io.File;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.plugin.Plugin;
 
+import java.io.File;
+
 public class CleanRoomConfiguration {
 
-    private static final int CONFIG_LATEST_VER = 0;
+    private static final int CONFIG_LATEST_VER = 1;
 
     private File file;
     private YMLParser parser;
@@ -47,9 +48,15 @@ public class CleanRoomConfiguration {
         loaded = success;
     }
 
-    private boolean upgradeConfiguration(YMLParser parser, int version) {
-        plugin.getLogger().warning("upgradeConfiguration() is not implemented, you shouldn't be seeing this message.");
-        return true; // to be written when the config gets new values and a version bump is needed.
+    private boolean upgradeConfiguration(YMLParser parser, int currentVersion) {
+        boolean flag = false;
+        if (currentVersion == 0) {
+            parser.set("version", 1);
+            parser.set("features.withhold_map_feature.use_alternate_method", false);
+            parser.set("features.withhold_map_feature.obfuscation.replace_with_id", false);
+            flag = parser.save();
+        }
+        return flag; // to be written when the config gets new values and a version bump is needed.
     }
 
     public YMLParser getParser() {

@@ -1,4 +1,4 @@
-version: 0
+version: 1
 features:
   withhold_map_feature:
     # The MD5 hashes specified in the withheld_maps list will not be rendered to players who:.
@@ -11,6 +11,13 @@ features:
       - "EXAMPLE318649F10AC5860230CA0DA5F" # An MD5 hash of the contents of a map
       - "BA1251263DE319076A6EB1E12EE33FCB" # Obtainable in-game by holding a map and running /hash
     withhold_all_maps: false # You can optionally choose to ban every single map within the prescribed spawn radius.
+    use_alternate_method: false # Change this to true if your server obfuscates the real Map ID in MapData packets.
+    obfuscation:
+      replace_with_id: false
+      # If replace_with_id is set to "false", the map will be replaced with a solid colour
+      # If replace_with_id is set to a Map ID, the server will obfuscate the banned map by rendering that Map ID over it.
+      # Warning: it is recommended to only use the Map ID of a LOCKED map.
+      # replace_with_id: 67 # This would make a banned map look like map_67.dat.
   filter_sign_feature:
     # Signs will have their contents modified before being sent to clients who:
     # - are within the prescribed spawn radius
