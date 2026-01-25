@@ -18,7 +18,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
-import network.twink.smpcleanroom.SmpCleanRoom;
+import network.twink.smpcleanroom.CompliantCleanRoom;
 import network.twink.smpcleanroom.feature.AbstractFeature;
 import network.twink.smpcleanroom.feature.FeatureManager;
 import network.twink.smpcleanroom.util.LocationUtil;
@@ -288,7 +288,7 @@ public class WithholdMapFeature extends AbstractFeature {
                     return false;
                 }
                 final String hash = args[0].trim();
-                if (this.feature.getPlugin() instanceof SmpCleanRoom cleanRoomPlugin) {
+                if (this.feature.getPlugin() instanceof CompliantCleanRoom cleanRoomPlugin) {
                     if (feature.bannedHashes.contains(hash)) {
                         synchronized (feature.bannedHashes) {
                             YMLParser parser =

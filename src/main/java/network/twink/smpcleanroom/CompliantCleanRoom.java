@@ -4,7 +4,7 @@ import network.twink.smpcleanroom.bypass.BypassManager;
 import network.twink.smpcleanroom.feature.FeatureManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class SmpCleanRoom extends JavaPlugin {
+public final class CompliantCleanRoom extends JavaPlugin {
 
     private CleanRoomConfiguration configuration;
     private FeatureManager featureManager;

@@ -1,4 +1,4 @@
-# SMP Clean Room (Anarchy Clean Room?)
+# CompliantCleanRoom
 
 ## Download (for Folia 1.21.x)
 Almost there... Just a few hours?

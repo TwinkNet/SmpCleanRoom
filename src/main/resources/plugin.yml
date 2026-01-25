@@ -1,7 +1,7 @@
-name: SmpCleanRoom
+name: CompliantCleanRoom
 version: '1.0'
 author: "Twink Enterprises"
-main: network.twink.smpcleanroom.SmpCleanRoom
+main: network.twink.smpcleanroom.CompliantCleanRoom
 api-version: '1.21'
 folia-supported: true
 depend: [ ProtocolLib ]
