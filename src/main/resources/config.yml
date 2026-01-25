@@ -1,34 +1,42 @@
 version: 0
 features:
   withhold_map_feature:
-    # The Map IDs specified in the withheld_maps list will not be rendered to players who are within the prescribed spawn radius.
-    # Additionally, setting withhold_all_maps to true will not render any maps to players within the prescribed spawn radius.
-    # If bypasses are enabled, players who meet the prescribed conditions will not be affected by this feature.
+    # The MD5 hashes specified in the withheld_maps list will not be rendered to players who:.
+    # - are within the prescribed spawn radius
+    # - do not meet the criteria of the configured bypasses
+    # You can ban hashes in-game by holding a filled map and running /hash, then clicking the message in the chatbox to ban it.
+    # You must have the following permissions to use that feature: cleanroom.hash & cleanroom.banhash
     enabled: true
-    withheld_maps: # A list of map IDs to withhold if they are placed within the prescribed spawn radius.
-      - "20D0AAE318649F10AC5860230CA0DA5F" # An MD5 hash of the contents of a map
+    withheld_maps:
+      - "EXAMPLE318649F10AC5860230CA0DA5F" # An MD5 hash of the contents of a map
       - "BA1251263DE319076A6EB1E12EE33FCB" # Obtainable in-game by holding a map and running /hash
-    withhold_all_maps: false # You can optionally choose to withhold every map within the prescribed spawn radius.
+    withhold_all_maps: false # You can optionally choose to ban every single map within the prescribed spawn radius.
   filter_sign_feature:
+    # Signs will have their contents modified before being sent to clients who:
+    # - are within the prescribed spawn radius
+    # - do not meet the criteria of the configured bypasses
+    # the "banned_words" section contains any banned words that will be changed to "?" on signs.
     enabled: true
 bypasses:
-  # Valid options are "all" and "one"
-  # These features will not be applied to an account that meets all or one of the criteria
-  # The permission bypass, when enabled, will not observe the "all" rule.
+  # Valid options for mode are "all" and "one"
+  # Redaction features will not be applied to an account that meets "all" or "one" of the bypass criteria
+  # The permission bypass, when enabled, is immune to the mode setting and will always act as "one"
   mode: "one"
   first_join:
+    # If enabled, players who joined before the below epoch timestamp in ms will meet the criteria for this bypass rule
     joindate_timestamp_ms: 1464760800000 # 1 June, 2016
     enabled: true
   total_playtime:
+    # If enabled, players who have 1 year of playtime on the world will meet the criteria for this bypass rule
     playtime_ticks: 631139040 # 1 year in ticks
     enabled: true
   permission:
+    # If enabled, players who have the below permission on their account will meet the criteria for this bypass rule
     perm: "cleanroom.bypass"
     enabled: true
 values:
-  overworld_dir_name: "world" # The name of the directory that contains your overworld.
   spawn_radius: 10000 # blocks from 0,0 in all worlds where enabled features will act within. This should be a value that you don't expect tourists to travel beyond.
-  banned_words:
+  banned_words: # A list of words that should be redacted from text-based features.
     - "dick"
     - "dicks"
     - "dicking"
