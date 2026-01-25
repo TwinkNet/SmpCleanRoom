@@ -11,10 +11,10 @@ You operate a Minecraft server. It has no rules. Players are putting stuff up at
 
 You probably don't want to add in-game moderators, and you're probably tired of deleting .dat files and banning people.
 
-This plugin attempts to find a balance between being presentable to Mojang's enforcement team, tourists (players who log in once or twice for a few minutes, then never again), and not screwing over your old players who are upset about the changes to your server's moderation tactics.
+This plugin attempts to find a balance between being presentable to Mojang's enforcement team, tourists (players who log in once or twice for a few minutes, then never again), and not screwing over your old players who are upset about the changes to your server's moderation tactics. It also aims to be **non-destructive** to your world's data.
 
 ## How?
-Your server probably has a spawn point at 0, 0 with a radius that goes out a few thousand blocks. All of your old players who just want to mind their own business and do whatever are way far away from spawn, so let's not mess with them. Instead, we can scrub the area around spawn squeaky clean and free of the most problematic junk without destroying the world and it's data on your disk with some packet trickery.
+Your server probably has a spawn point at 0, 0 with a radius that goes out a few thousand blocks. Your real playerbase, the people who just want to mind their own business and do whatever, are way far away from spawn, so let's not mess with them. Instead, we can scrub the area around spawn squeaky clean and free of the most problematic junk without destroying the world and it's data on your disk with some packet trickery. Spawn will be your "Clean Room".
 
 ### Sign Filtering
 This plugin employs a feature that can filter configurable words out of signs within a configurable proximity to spawn, both newly placed and existing, without deleting the sign's real data. Actual sign data is **not modified**, only the packets that are sent to the client are modified. You can optionally set up Bypassing so that certain players are not affected by this filtering at spawn. Currently, you can add a permission to a player to bypass the filtering, allow players who joined before a certain date to bypass the filtering, and/or allow players who have a certain amount of playtime on the server to bypass the filtering.
