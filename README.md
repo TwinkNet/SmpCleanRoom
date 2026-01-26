@@ -8,6 +8,9 @@ I do not intend to target non-Folia Paper at this time unless there is a demand.
 
 [Default config.yml and documentation](https://github.com/TwinkNet/SmpCleanRoom/blob/master/src/main/resources/config.yml)
 
+## Compiling
+`./gradlew build -x spotlessJavaCheck`
+
 ---
 ## What is this?
 You may be interested in this plugin if you operate an "anarchy" Minecraft server has little or no rules. If players are putting stuff up at spawn that is catching Mojang's attention due to their commercial use guidelines or community standards, you will definitely want this plugin.
