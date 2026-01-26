@@ -12,7 +12,7 @@ I do not intend to target non-Folia Paper at this time unless there is a demand.
 ## What is this?
 You may be interested in this plugin if you operate an "anarchy" Minecraft server has little or no rules. If players are putting stuff up at spawn that is catching Mojang's attention due to their commercial use guidelines or community standards, you will definitely want this plugin.
 
-Adding in-game moderators, deleting, .dat files, and banning people go against the concept of the kind of server I'm referencing. Instead of destroying data and destroying player experiences, we can attempt to find a balance between being presentable to Mojang's enforcement team, tourists (players who log in once or twice for a few minutes, then never again), and not screwing over your old players who are upset about the changes to your server's moderation tactics. 
+Adding in-game moderators, deleting .dat files, and banning people go against the concept of the kind of server I'm referencing. Instead of destroying data and destroying player experiences, we can attempt to find a balance between being presentable to Mojang's enforcement team, tourists (players who log in once or twice for a few minutes, then never again), and not screwing over your old players who are upset about the changes to your server's moderation tactics. 
 
 This plugin's core principal is to be **non-destructive** to your world's data.
 
