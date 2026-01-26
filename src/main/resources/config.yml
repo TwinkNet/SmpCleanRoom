@@ -13,11 +13,17 @@ features:
     withhold_all_maps: false # You can optionally choose to ban every single map within the prescribed spawn radius.
     use_alternate_method: false # Change this to true if your server obfuscates the real Map ID in MapData packets.
     obfuscation:
-      replace_with_id: false
-      # If replace_with_id is set to "false", the map will be replaced with a solid colour
-      # If replace_with_id is set to a Map ID, the server will obfuscate the banned map by rendering that Map ID over it.
-      # Warning: it is recommended to only use the Map ID of a LOCKED map.
-      # replace_with_id: 67 # This would make a banned map look like map_67.dat.
+      obfuscate_with_noise: true # Recommended to leave true, if this is false, banned maps will appear as a solid colour.
+      replace_with_id_when_possible: false
+      #
+      # If replace_with_id_when_possible is set to "false", the map will be replaced with a solid colour or random noise according to obfuscate_with_noise
+      # If replace_with_id_when_possible is set to a Map ID, the server will obfuscate the banned map by rendering that Map ID over it whenever possible.
+      #
+      # Warning: it is recommended to only use the Map ID of a locked map that any player has a high chance of running into. Currently, the plugin
+      # will use the default obfuscation method UNTIL any single player on your server sees the map in-game that you have set here.
+      #
+      # replace_with_id_when_possible: 67 # This would make a banned map look like map_67.dat.
+      #
   filter_sign_feature:
     # Signs will have their contents modified before being sent to clients who:
     # - are within the prescribed spawn radius

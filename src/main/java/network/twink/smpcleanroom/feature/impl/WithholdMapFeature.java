@@ -44,6 +44,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
 
 public class WithholdMapFeature extends AbstractFeature {
@@ -51,9 +52,10 @@ public class WithholdMapFeature extends AbstractFeature {
     private ProtocolManager protocolManager;
     private final int radius;
     private final boolean withholdAll;
-    private boolean useAlternateMethod;
-    private final boolean replaceWithId;
-    private int replaceId = 0;
+    private final boolean useAlternateMethod;
+    private final boolean replaceWithIdWheneverPossible;
+    private final boolean replaceWithNoise;
+    private int replacementId = 0;
     private final List<String> bannedHashes;
     private SpoofMapRenderer spoofMapRenderer;
 
@@ -64,22 +66,25 @@ public class WithholdMapFeature extends AbstractFeature {
             List<String> bannedHashes,
             boolean withholdAll,
             boolean useAlternateMethod,
-            boolean replaceWithId,
-            int replaceId) {
+            boolean replaceWithIdWheneverPossible,
+            boolean replaceWithNoise,
+            int replacementId) {
         super(featureManager, plugin, "withhold_map_feature");
         this.bannedHashes = bannedHashes;
         this.withholdAll = withholdAll;
         this.radius = radius;
+        this.replaceWithNoise = replaceWithNoise;
         this.useAlternateMethod = useAlternateMethod;
-        this.replaceWithId = replaceWithId;
-        if (replaceWithId) {
-            this.replaceId = replaceId;
-            getPlugin().getLogger().info("Will render map_" + replaceId + ".dat on banned maps.");
+        this.replaceWithIdWheneverPossible = replaceWithIdWheneverPossible;
+        if (replaceWithIdWheneverPossible) {
+            this.replacementId = replacementId;
+            getPlugin().getLogger().info("Will try to render map_" + replacementId + ".dat on banned maps.");
         }
     }
 
     @Override
-    public void onPreStartup() {}
+    public void onPreStartup() {
+    }
 
     @Override
     public void onStartup() {
@@ -132,7 +137,7 @@ public class WithholdMapFeature extends AbstractFeature {
                     return;
                 }
             }
-            RedactionMapRenderer renderer = new RedactionMapRenderer(mapView.getId());
+            RedactionMapRenderer renderer = new RedactionMapRenderer(mapView.getId(), replaceWithNoise);
             meta.getMapView().addRenderer(renderer);
             stack.setItemMeta(meta);
             if (flag) protocolManager.getAsynchronousManager().signalPacketTransmission(event);
@@ -140,12 +145,13 @@ public class WithholdMapFeature extends AbstractFeature {
     }
 
     @Override
-    public void onShutdown() {}
+    public void onShutdown() {
+    }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (replaceWithId && spoofMapRenderer == null) {
-            spoofMapRenderer = new SpoofMapRenderer(event.getPlayer(), replaceId);
+        if (replaceWithIdWheneverPossible && spoofMapRenderer == null) {
+            spoofMapRenderer = new SpoofMapRenderer(event.getPlayer(), replacementId);
         }
         if (useAlternateMethod) {
             for (ItemStack stack : event.getPlayer().getInventory()) {
@@ -264,7 +270,7 @@ public class WithholdMapFeature extends AbstractFeature {
                                 }
                             }
                             if (renderer == null) {
-                                renderer = new RedactionMapRenderer(meta.getMapId());
+                                renderer = new RedactionMapRenderer(meta.getMapId(), replaceWithNoise);
                                 meta.getMapView().addRenderer(renderer);
                             }
                             RedactionMapRenderer finalRenderer = renderer;
@@ -396,9 +402,14 @@ public class WithholdMapFeature extends AbstractFeature {
         private final int mapId;
         private String hash = null;
         private final int[] pixelArr = new int[16384];
+        private final int[] noisePixelArr = new int[16384];
+        private Random rand = null;
 
-        private RedactionMapRenderer(int mapId) {
+        private RedactionMapRenderer(int mapId, boolean useNoise) {
             this.mapId = mapId;
+            if (useNoise) {
+                rand = new Random();
+            }
         }
 
         @Override
@@ -412,6 +423,9 @@ public class WithholdMapFeature extends AbstractFeature {
                             pixel = canvas.getBasePixelColor(x, y);
                         }
                         pixelArr[cursor++] = pixel.getRGB();
+                        if (rand != null) {
+                            noisePixelArr[rand.nextInt(16384)] = pixel.getRGB();
+                        }
                     }
                 }
                 try {
@@ -421,6 +435,10 @@ public class WithholdMapFeature extends AbstractFeature {
                 }
             }
             if (WithholdMapFeature.this.withholdAll || WithholdMapFeature.this.bannedHashes.contains(this.hash)) {
+                if (replaceWithIdWheneverPossible && replacementId == mapId) {
+                    getPlugin().getLogger().severe("Banned Map ID " + mapId + " is the same as the Map ID you have set to replace banned maps with.");
+                    getPlugin().getLogger().severe("Unexpected behaviour WILL occur, and this message won't go away until you do something about it.");
+                }
                 banThisMap(map, canvas, player);
             } else {
                 unbanThisMap(canvas);
@@ -454,7 +472,7 @@ public class WithholdMapFeature extends AbstractFeature {
                 unbanThisMap(canvas);
                 return;
             }
-            if (WithholdMapFeature.this.replaceWithId
+            if (WithholdMapFeature.this.replaceWithIdWheneverPossible
                     && WithholdMapFeature.this.spoofMapRenderer != null
                     && WithholdMapFeature.this.spoofMapRenderer.isCaptured()) {
                 int cursor = 0;
@@ -465,10 +483,19 @@ public class WithholdMapFeature extends AbstractFeature {
                     }
                 }
             } else {
-                Color color = canvas.getBasePixelColor(6, 7);
-                for (int x = 0; x < 128; x++) {
-                    for (int y = 0; y < 128; y++) {
-                        canvas.setPixelColor(x, y, color);
+                if (rand != null) {
+                    int cursor = 0;
+                    for (int x = 0; x < 128; x++) {
+                        for (int y = 0; y < 128; y++) {
+                            canvas.setPixelColor(x, y, new Color(noisePixelArr[cursor++]));
+                        }
+                    }
+                } else {
+                    Color color = canvas.getBasePixelColor(6, 7);
+                    for (int x = 0; x < 128; x++) {
+                        for (int y = 0; y < 128; y++) {
+                            canvas.setPixelColor(x, y, color);
+                        }
                     }
                 }
             }

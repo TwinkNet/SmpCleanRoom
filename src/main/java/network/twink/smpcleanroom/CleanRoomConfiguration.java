@@ -1,12 +1,15 @@
 package network.twink.smpcleanroom;
 
-import java.io.File;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.plugin.Plugin;
 
+import java.io.File;
+
 public class CleanRoomConfiguration {
 
-    private static final int CONFIG_LATEST_VER = 1;
+    private static final int CONFIG_LATEST_VER = 2;
+    public static final String DELETED = "deleted";
+    public static final String MOVED = "renamed or moved";
 
     private File file;
     private YMLParser parser;
@@ -47,14 +50,18 @@ public class CleanRoomConfiguration {
     }
 
     private boolean upgradeConfiguration(YMLParser parser, int currentVersion) {
-        boolean flag = false;
-        if (currentVersion == 0) {
-            parser.set("version", 1);
-            parser.set("features.withhold_map_feature.use_alternate_method", false);
-            parser.set("features.withhold_map_feature.obfuscation.replace_with_id", false);
-            flag = parser.save();
+        switch (currentVersion) {
+            case 0:
+                parser.set("version", 1);
+                parser.set("features.withhold_map_feature.use_alternate_method", false);
+                parser.set("features.withhold_map_feature.obfuscation.replace_with_id", false);
+            case 1:
+                parser.set("version", 2);
+                parser.set("features.withhold_map_feature.obfuscation.replace_with_id_when_possible", parser.get("features.withhold_map_feature.obfuscation.replace_with_id"));
+                parser.set("features.withhold_map_feature.obfuscation.replace_with_id", MOVED);
+                parser.set("features.withhold_map_feature.obfuscation.obfuscate_with_noise", true);
         }
-        return flag; // to be written when the config gets new values and a version bump is needed.
+        return parser.save(); // to be written when the config gets new values and a version bump is needed.
     }
 
     public YMLParser getParser() {
