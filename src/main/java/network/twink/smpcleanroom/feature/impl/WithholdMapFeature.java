@@ -6,15 +6,8 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
+import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
-import java.awt.*;
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -27,7 +20,12 @@ import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapCanvas;
@@ -35,21 +33,48 @@ import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.awt.*;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class WithholdMapFeature extends AbstractFeature {
 
     private ProtocolManager protocolManager;
     private final int radius;
     private final boolean withholdAll;
+    private boolean useAlternateMethod;
+    private final boolean replaceWithId;
+    private int replaceId = 0;
     private final List<String> bannedHashes;
+    private SpoofMapRenderer spoofMapRenderer;
 
     public WithholdMapFeature(
-            FeatureManager featureManager, Plugin plugin, int radius, List<String> bannedHashes, boolean withholdAll) {
+            FeatureManager featureManager,
+            Plugin plugin,
+            int radius,
+            List<String> bannedHashes,
+            boolean withholdAll,
+            boolean useAlternateMethod,
+            boolean replaceWithId,
+            int replaceId) {
         super(featureManager, plugin, "withhold_map_feature");
         this.bannedHashes = bannedHashes;
         this.withholdAll = withholdAll;
         this.radius = radius;
+        this.useAlternateMethod = useAlternateMethod;
+        this.replaceWithId = replaceWithId;
+        if (replaceWithId) {
+            this.replaceId = replaceId;
+            getPlugin().getLogger().info("Will render map_" + replaceId + ".dat on banned maps.");
+        }
     }
 
     @Override
@@ -59,25 +84,27 @@ public class WithholdMapFeature extends AbstractFeature {
     public void onStartup() {
         this.getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
 
-        protocolManager = ProtocolLibrary.getProtocolManager();
-        protocolManager
-                .getAsynchronousManager()
-                .registerAsyncHandler(
-                        new PacketAdapter(getPlugin(), ListenerPriority.NORMAL, PacketType.Play.Server.MAP) {
-                            @Override
-                            public void onPacketSending(PacketEvent pck) {
-                                int mapId = pck.getPacket()
-                                        .getStructures()
-                                        .read(0)
-                                        .getIntegers()
-                                        .read(0);
-                                pck.getAsyncMarker().incrementProcessingDelay();
-                                pck.getPlayer()
-                                        .getScheduler()
-                                        .run(getPlugin(), getMapAnalyseSyncTask(pck, mapId), null);
-                            }
-                        })
-                .start();
+        if (!useAlternateMethod) {
+            protocolManager = ProtocolLibrary.getProtocolManager();
+            protocolManager
+                    .getAsynchronousManager()
+                    .registerAsyncHandler(
+                            new PacketAdapter(getPlugin(), ListenerPriority.NORMAL, PacketType.Play.Server.MAP) {
+                                @Override
+                                public void onPacketSending(PacketEvent pck) {
+                                    int mapId = pck.getPacket()
+                                            .getStructures()
+                                            .read(0)
+                                            .getIntegers()
+                                            .read(0);
+                                    pck.getAsyncMarker().incrementProcessingDelay();
+                                    pck.getPlayer()
+                                            .getScheduler()
+                                            .run(getPlugin(), getMapAnalyseSyncTask(pck, mapId), null);
+                                }
+                            })
+                    .start();
+        }
         ArrayList<String> aliases = new ArrayList<>();
         aliases.add("hash");
         getPlugin().getServer().getCommandMap().register("smpcleanroom", new HashCommand(this, aliases));
@@ -86,31 +113,98 @@ public class WithholdMapFeature extends AbstractFeature {
         getPlugin().getServer().getCommandMap().register("smpcleanroom", new BanHashCommand(this, aliaseses));
     }
 
-    private @NonNull Consumer<ScheduledTask> getMapAnalyseSyncTask(PacketEvent event, int mapId) {
+    private Consumer<ScheduledTask> getMapAnalyseSyncTask(@Nullable PacketEvent event, int mapId) {
         return task -> {
+            boolean flag = event != null;
             ItemStack stack = new ItemStack(Material.FILLED_MAP);
             MapMeta meta = (MapMeta) stack.getItemMeta();
             //noinspection deprecation
             meta.setMapId(mapId);
             if (!meta.hasMapView() || meta.getMapView() == null) {
-                protocolManager.getAsynchronousManager().signalPacketTransmission(event);
+                if (flag) protocolManager.getAsynchronousManager().signalPacketTransmission(event);
                 return;
             }
             for (MapRenderer renderer : meta.getMapView().getRenderers()) {
                 if (renderer instanceof RedactionMapRenderer) {
-                    protocolManager.getAsynchronousManager().signalPacketTransmission(event);
+                    if (flag) protocolManager.getAsynchronousManager().signalPacketTransmission(event);
                     return;
                 }
             }
             RedactionMapRenderer renderer = new RedactionMapRenderer(mapId);
             meta.getMapView().addRenderer(renderer);
             stack.setItemMeta(meta);
-            protocolManager.getAsynchronousManager().signalPacketTransmission(event);
+            if (flag) protocolManager.getAsynchronousManager().signalPacketTransmission(event);
         };
     }
 
     @Override
     public void onShutdown() {}
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if (replaceWithId && spoofMapRenderer == null) {
+            spoofMapRenderer = new SpoofMapRenderer(event.getPlayer(), replaceId);
+        }
+        if (useAlternateMethod) {
+            for (ItemStack stack : event.getPlayer().getInventory()) {
+                if (stack != null && stack.getType() == Material.FILLED_MAP) {
+                    MapMeta meta = (MapMeta) stack.getItemMeta();
+                    if (meta.hasMapView() && meta.getMapView() != null) {
+                        int id = meta.getMapId();
+                        event.getPlayer().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, id), null);
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInvClick(InventoryClickEvent event) {
+        if (useAlternateMethod) {
+            ItemStack stack = event.getCurrentItem();
+            if (stack != null && stack.getType() == Material.FILLED_MAP) {
+                MapMeta meta = (MapMeta) stack.getItemMeta();
+                if (meta.hasMapView() && meta.getMapView() != null) {
+                    int id = meta.getMapId();
+                    event.getWhoClicked().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, id), null);
+                }
+            }
+            stack = event.getCursor();
+            if (stack.getType() == Material.FILLED_MAP) {
+                MapMeta meta = (MapMeta) stack.getItemMeta();
+                if (meta.hasMapView() && meta.getMapView() != null) {
+                    int id = meta.getMapId();
+                    event.getWhoClicked().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, id), null);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntityLoad(EntityAddToWorldEvent e) {
+        if (!useAlternateMethod) return;
+        if (e.getEntity() instanceof ItemFrame frame) {
+            if (frame.getItem().getType() == Material.FILLED_MAP) {
+                MapMeta meta = (MapMeta) frame.getItem().getItemMeta();
+                if (meta.hasMapView() && meta.getMapView() != null) {
+                    int id = meta.getMapId();
+                    e.getEntity().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, id), null);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onItemPickup(PlayerAttemptPickupItemEvent e) {
+        ItemStack stack = e.getItem().getItemStack();
+        if (stack != null && stack.getType() == Material.FILLED_MAP) {
+            MapMeta meta = (MapMeta) stack.getItemMeta();
+            if (meta.hasMapView() && meta.getMapView() != null) {
+                int id = meta.getMapId();
+                e.getPlayer().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, id), null);
+            }
+        }
+    }
 
     private String generateHash(int[] pixels) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5");
@@ -317,7 +411,7 @@ public class WithholdMapFeature extends AbstractFeature {
             if (WithholdMapFeature.this.withholdAll || WithholdMapFeature.this.bannedHashes.contains(this.hash)) {
                 banThisMap(map, canvas, player);
             } else {
-                unbanThisMap(map, canvas, player);
+                unbanThisMap(canvas);
             }
         }
 
@@ -337,32 +431,95 @@ public class WithholdMapFeature extends AbstractFeature {
 
         public void banThisMap(@NotNull MapView map, @NotNull MapCanvas canvas, @NotNull Player player) {
             if (!LocationUtil.isLocationInsideSpawnRadius(player.getLocation(), WithholdMapFeature.this.radius)) {
-                unbanThisMap(map, canvas, player);
+                unbanThisMap(canvas);
                 return;
             }
             if (getFeatureManager().getBypassManager().isCriteriaMet(player)) {
-                unbanThisMap(map, canvas, player);
+                unbanThisMap(canvas);
                 return;
             }
             if (getFeatureManager().getBypassManager().isCriteriaMet(player.getLocation())) {
-                unbanThisMap(map, canvas, player);
+                unbanThisMap(canvas);
                 return;
             }
-            Color color = canvas.getBasePixelColor(6, 7);
-            for (int x = 0; x < 128; x++) {
-                for (int y = 0; y < 128; y++) {
-                    canvas.setPixelColor(x, y, color);
+            if (WithholdMapFeature.this.replaceWithId
+                    && WithholdMapFeature.this.spoofMapRenderer != null
+                    && WithholdMapFeature.this.spoofMapRenderer.isCaptured()) {
+                int cursor = 0;
+                for (int x = 0; x < 128; x++) {
+                    for (int y = 0; y < 128; y++) {
+                        int rgb = spoofMapRenderer.getPixelArr()[cursor++];
+                        canvas.setPixelColor(x, y, new Color(rgb));
+                    }
+                }
+            } else {
+                Color color = canvas.getBasePixelColor(6, 7);
+                for (int x = 0; x < 128; x++) {
+                    for (int y = 0; y < 128; y++) {
+                        canvas.setPixelColor(x, y, color);
+                    }
                 }
             }
         }
 
-        public void unbanThisMap(@NotNull MapView map, @NotNull MapCanvas canvas, @NotNull Player player) {
-            Color color = canvas.getBasePixelColor(6, 7);
+        public void unbanThisMap(@NotNull MapCanvas canvas) {
             for (int x = 0; x < 128; x++) {
                 for (int y = 0; y < 128; y++) {
                     canvas.setPixelColor(x, y, null);
                 }
             }
+        }
+    }
+
+    private class SpoofMapRenderer extends MapRenderer {
+
+        private final int[] pixelArr = new int[16384];
+
+        {
+            Arrays.fill(pixelArr, Integer.MIN_VALUE);
+        }
+
+        public SpoofMapRenderer(Player randomPlayer, int mapId) {
+            ItemStack stack = new ItemStack(Material.FILLED_MAP);
+            MapMeta meta = (MapMeta) stack.getItemMeta();
+            meta.setMapId(mapId);
+            stack.setItemMeta(meta);
+            if (meta.hasMapView() && meta.getMapView() != null) {
+                randomPlayer.sendMap(meta.getMapView());
+                meta.getMapView().addRenderer(this);
+                return;
+            }
+            getPlugin()
+                    .getLogger()
+                    .warning(
+                            "Couldn't get mapview. The configured map ID might not exist. Switching default strategy (solid colour)");
+            WithholdMapFeature.this.useAlternateMethod = false;
+        }
+
+        @Override
+        public void render(@NotNull MapView map, @NotNull MapCanvas canvas, @NotNull Player player) {
+            if (!isCaptured()) {
+                int cursor = 0;
+                for (int x = 0; x < 128; x++) {
+                    for (int y = 0; y < 128; y++) {
+                        Color pixel = canvas.getPixelColor(x, y);
+                        if (pixel == null) {
+                            pixel = canvas.getBasePixelColor(x, y);
+                        }
+                        pixelArr[cursor++] = pixel.getRGB();
+                    }
+                }
+            }
+        }
+
+        public int[] getPixelArr() {
+            synchronized (pixelArr) {
+                return pixelArr;
+            }
+        }
+
+        public boolean isCaptured() {
+            return pixelArr[0] != Integer.MIN_VALUE;
         }
     }
 }

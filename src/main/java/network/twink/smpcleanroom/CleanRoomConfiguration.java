@@ -1,9 +1,8 @@
 package network.twink.smpcleanroom;
 
+import java.io.File;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.plugin.Plugin;
-
-import java.io.File;
 
 public class CleanRoomConfiguration {
 
@@ -13,7 +12,6 @@ public class CleanRoomConfiguration {
     private YMLParser parser;
     private final Plugin plugin;
     private boolean loaded = false;
-    // private Values values;
 
     public CleanRoomConfiguration(Plugin plugin) {
         this.plugin = plugin;

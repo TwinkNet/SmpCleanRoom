@@ -29,8 +29,23 @@ public class FeatureManager {
                 defaultMapIdBanList = parser.getStringList(key);
             }
             boolean withHoldAll = parser.getBoolean(FEATURES_ + "withhold_map_feature.withhold_all_maps", true);
-            String worldName = parser.getString(VALUES_ + "overworld_dir_name", "world");
-            featureRegistry.add(new WithholdMapFeature(this, plugin, radius, defaultMapIdBanList, withHoldAll));
+            boolean useAlternateMethod =
+                    parser.getBoolean(FEATURES_ + "withhold_map_feature.use_alternate_method", false);
+            boolean replaceWithId = false;
+            int replaceId = 0;
+            if (parser.isInt(FEATURES_ + "withhold_map_feature.obfuscation.replace_with_id")) {
+                replaceWithId = true;
+                replaceId = parser.getInt(FEATURES_ + "withhold_map_feature.obfuscation.replace_with_id");
+            }
+            featureRegistry.add(new WithholdMapFeature(
+                    this,
+                    plugin,
+                    radius,
+                    defaultMapIdBanList,
+                    withHoldAll,
+                    useAlternateMethod,
+                    replaceWithId,
+                    replaceId));
         }
         if (parser.getBoolean(FEATURES_ + "filter_sign_feature.enabled", true)) {
             List<String> defaultBannedWords = new ArrayList<>();
