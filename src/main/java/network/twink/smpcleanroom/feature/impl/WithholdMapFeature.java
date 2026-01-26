@@ -17,6 +17,7 @@ import network.twink.smpcleanroom.feature.AbstractFeature;
 import network.twink.smpcleanroom.feature.FeatureManager;
 import network.twink.smpcleanroom.util.LocationUtil;
 import network.twink.smpcleanroom.util.yml.YMLParser;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -97,10 +98,12 @@ public class WithholdMapFeature extends AbstractFeature {
                                             .read(0)
                                             .getIntegers()
                                             .read(0);
+                                    MapView view = Bukkit.getMap(mapId);
+                                    if (view == null) return;
                                     pck.getAsyncMarker().incrementProcessingDelay();
                                     pck.getPlayer()
                                             .getScheduler()
-                                            .run(getPlugin(), getMapAnalyseSyncTask(pck, mapId), null);
+                                            .run(getPlugin(), getMapAnalyseSyncTask(pck, view), null);
                                 }
                             })
                     .start();
@@ -113,13 +116,12 @@ public class WithholdMapFeature extends AbstractFeature {
         getPlugin().getServer().getCommandMap().register("smpcleanroom", new BanHashCommand(this, aliaseses));
     }
 
-    private Consumer<ScheduledTask> getMapAnalyseSyncTask(@Nullable PacketEvent event, int mapId) {
+    private Consumer<ScheduledTask> getMapAnalyseSyncTask(@Nullable PacketEvent event, MapView mapView) {
         return task -> {
             boolean flag = event != null;
             ItemStack stack = new ItemStack(Material.FILLED_MAP);
             MapMeta meta = (MapMeta) stack.getItemMeta();
-            //noinspection deprecation
-            meta.setMapId(mapId);
+            meta.setMapView(mapView);
             if (!meta.hasMapView() || meta.getMapView() == null) {
                 if (flag) protocolManager.getAsynchronousManager().signalPacketTransmission(event);
                 return;
@@ -130,7 +132,7 @@ public class WithholdMapFeature extends AbstractFeature {
                     return;
                 }
             }
-            RedactionMapRenderer renderer = new RedactionMapRenderer(mapId);
+            RedactionMapRenderer renderer = new RedactionMapRenderer(mapView.getId());
             meta.getMapView().addRenderer(renderer);
             stack.setItemMeta(meta);
             if (flag) protocolManager.getAsynchronousManager().signalPacketTransmission(event);
@@ -151,7 +153,9 @@ public class WithholdMapFeature extends AbstractFeature {
                     MapMeta meta = (MapMeta) stack.getItemMeta();
                     if (meta.hasMapView() && meta.getMapView() != null) {
                         int id = meta.getMapId();
-                        event.getPlayer().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, id), null);
+                        MapView view = Bukkit.getMap(id);
+                        if (view == null) return;
+                        event.getPlayer().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, view), null);
                     }
                 }
             }
@@ -166,7 +170,9 @@ public class WithholdMapFeature extends AbstractFeature {
                 MapMeta meta = (MapMeta) stack.getItemMeta();
                 if (meta.hasMapView() && meta.getMapView() != null) {
                     int id = meta.getMapId();
-                    event.getWhoClicked().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, id), null);
+                    MapView view = Bukkit.getMap(id);
+                    if (view == null) return;
+                    event.getWhoClicked().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, view), null);
                 }
             }
             stack = event.getCursor();
@@ -174,7 +180,9 @@ public class WithholdMapFeature extends AbstractFeature {
                 MapMeta meta = (MapMeta) stack.getItemMeta();
                 if (meta.hasMapView() && meta.getMapView() != null) {
                     int id = meta.getMapId();
-                    event.getWhoClicked().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, id), null);
+                    MapView view = Bukkit.getMap(id);
+                    if (view == null) return;
+                    event.getWhoClicked().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, view), null);
                 }
             }
         }
@@ -188,7 +196,9 @@ public class WithholdMapFeature extends AbstractFeature {
                 MapMeta meta = (MapMeta) frame.getItem().getItemMeta();
                 if (meta.hasMapView() && meta.getMapView() != null) {
                     int id = meta.getMapId();
-                    e.getEntity().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, id), null);
+                    MapView view = Bukkit.getMap(id);
+                    if (view == null) return;
+                    e.getEntity().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, view), null);
                 }
             }
         }
@@ -201,7 +211,9 @@ public class WithholdMapFeature extends AbstractFeature {
             MapMeta meta = (MapMeta) stack.getItemMeta();
             if (meta.hasMapView() && meta.getMapView() != null) {
                 int id = meta.getMapId();
-                e.getPlayer().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, id), null);
+                MapView view = Bukkit.getMap(id);
+                if (view == null) return;
+                e.getPlayer().getScheduler().run(getPlugin(), getMapAnalyseSyncTask(null, view), null);
             }
         }
     }
@@ -381,7 +393,7 @@ public class WithholdMapFeature extends AbstractFeature {
 
     private class RedactionMapRenderer extends MapRenderer {
 
-        private int mapId;
+        private final int mapId;
         private String hash = null;
         private final int[] pixelArr = new int[16384];
 
@@ -473,6 +485,7 @@ public class WithholdMapFeature extends AbstractFeature {
 
     private class SpoofMapRenderer extends MapRenderer {
 
+        private boolean error = false;
         private final int[] pixelArr = new int[16384];
 
         {
@@ -482,7 +495,8 @@ public class WithholdMapFeature extends AbstractFeature {
         public SpoofMapRenderer(Player randomPlayer, int mapId) {
             ItemStack stack = new ItemStack(Material.FILLED_MAP);
             MapMeta meta = (MapMeta) stack.getItemMeta();
-            meta.setMapId(mapId);
+            MapView view = Bukkit.getMap(mapId);
+            meta.setMapView(view);
             stack.setItemMeta(meta);
             if (meta.hasMapView() && meta.getMapView() != null) {
                 randomPlayer.sendMap(meta.getMapView());
@@ -493,7 +507,7 @@ public class WithholdMapFeature extends AbstractFeature {
                     .getLogger()
                     .warning(
                             "Couldn't get mapview. The configured map ID might not exist. Switching default strategy (solid colour)");
-            WithholdMapFeature.this.useAlternateMethod = false;
+            error = true;
         }
 
         @Override
@@ -520,6 +534,10 @@ public class WithholdMapFeature extends AbstractFeature {
 
         public boolean isCaptured() {
             return pixelArr[0] != Integer.MIN_VALUE;
+        }
+
+        public boolean isErrored() {
+            return error;
         }
     }
 }
