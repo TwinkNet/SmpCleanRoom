@@ -1,8 +1,8 @@
 # CompliantCleanRoom
 
 ## Download (for Folia 1.21.x)
-[Release Candidate RC-2026.01.25 is out!](https://github.com/TwinkNet/SmpCleanRoom/releases/tag/RC-2026.01.25)
-This release candidate is ready to go. It has been tested on a small server, but it hasn't been tested on a larger server. The good news is that this plugin doesn't change with any of your world's data. If an issue is noticed, make an issue on this page and remove the plugin from your server if it is causing critical playability issues or not being effective.
+[Release Candidate RC-2026.01.26 is out!](https://github.com/TwinkNet/SmpCleanRoom/releases/tag/RC-2026.01.26)
+This release candidate is ready to go. It has been tested throughly on a small server with several players. If an issue is noticed, make an issue on this page and remove the plugin from your server if it is causing critical playability issues or not being effective.
 
 I do not intend to target non-Folia Paper at this time unless there is a demand. You should be using Folia over Paper if you run a server that needs a plugin like this.
 
