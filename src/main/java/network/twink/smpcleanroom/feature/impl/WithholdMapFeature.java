@@ -16,6 +16,7 @@ import network.twink.smpcleanroom.CompliantCleanRoom;
 import network.twink.smpcleanroom.feature.AbstractFeature;
 import network.twink.smpcleanroom.feature.FeatureManager;
 import network.twink.smpcleanroom.util.LocationUtil;
+import network.twink.smpcleanroom.util.SerializableRedactionData;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -37,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -58,6 +60,7 @@ public class WithholdMapFeature extends AbstractFeature {
     private int replacementId = 0;
     private final List<String> bannedHashes;
     private SpoofMapRenderer spoofMapRenderer;
+    private SerializableRedactionData savedRedactionData;
 
     public WithholdMapFeature(
             FeatureManager featureManager,
@@ -89,7 +92,15 @@ public class WithholdMapFeature extends AbstractFeature {
     @Override
     public void onStartup() {
         this.getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
-
+        if (replaceWithIdWheneverPossible) {
+            boolean flag = this.loadSavedRedactionData();
+            if (flag) {
+                getPlugin().getLogger().info("Restored Map ID " + savedRedactionData.getMapId() + " from disk. It will be used as the redaction method.");
+            } else {
+                String method = replaceWithNoise ? "random noise" : "solid colour";
+                getPlugin().getLogger().warning("Redaction method \"" + method + "\" will be used until a player discovers Map ID " + replacementId);
+            }
+        }
         if (!useAlternateMethod) {
             protocolManager = ProtocolLibrary.getProtocolManager();
             protocolManager
@@ -146,6 +157,44 @@ public class WithholdMapFeature extends AbstractFeature {
 
     @Override
     public void onShutdown() {
+    }
+
+    public boolean loadSavedRedactionData() {
+        File file = new File(getPlugin().getDataFolder(), "CleanRoomSavedMapData.arr");
+        if (!file.exists()) return false;
+        try (FileInputStream stream = new FileInputStream(file)) {
+            ObjectInputStream objStream = new ObjectInputStream(stream);
+            SerializableRedactionData data = (SerializableRedactionData) objStream.readObject();
+            if (data.getMapId() == this.replacementId) {
+                this.savedRedactionData = data;
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            getPlugin().getLogger().severe(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean saveRedactionData(int mapId, int[] arr) {
+        File file = new File(getPlugin().getDataFolder(), "CleanRoomSavedMapData.arr");
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException ignored) {
+                getPlugin().getLogger().severe("IOException while creating CleanRoomSavedMapData.arr");
+                return false;
+            }
+        }
+        try (FileOutputStream stream = new FileOutputStream(file)) {
+            ObjectOutputStream objStream = new ObjectOutputStream(stream);
+            this.savedRedactionData = new SerializableRedactionData(mapId, arr);
+            objStream.writeObject(this.savedRedactionData);
+            return true;
+        } catch (Exception e) {
+            getPlugin().getLogger().severe(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
+        return false;
     }
 
     @EventHandler
@@ -513,10 +562,14 @@ public class WithholdMapFeature extends AbstractFeature {
     private class SpoofMapRenderer extends MapRenderer {
 
         private boolean error = false;
-        private final int[] pixelArr = new int[16384];
+        private int[] pixelArr = new int[16384];
 
         {
             Arrays.fill(pixelArr, Integer.MIN_VALUE);
+        }
+
+        public SpoofMapRenderer(int[] pixelArr) {
+            this.pixelArr = pixelArr;
         }
 
         public SpoofMapRenderer(Player randomPlayer, int mapId) {
@@ -539,7 +592,7 @@ public class WithholdMapFeature extends AbstractFeature {
 
         @Override
         public void render(@NotNull MapView map, @NotNull MapCanvas canvas, @NotNull Player player) {
-            if (!isCaptured()) {
+            if (!isCaptured() && !isErrored()) {
                 int cursor = 0;
                 for (int x = 0; x < 128; x++) {
                     for (int y = 0; y < 128; y++) {
@@ -548,6 +601,11 @@ public class WithholdMapFeature extends AbstractFeature {
                             pixel = canvas.getBasePixelColor(x, y);
                         }
                         pixelArr[cursor++] = pixel.getRGB();
+                    }
+                }
+                if (isCaptured()) {
+                    if (WithholdMapFeature.this.saveRedactionData(map.getId(), getPixelArr())) {
+                        WithholdMapFeature.this.getPlugin().getLogger().info("Map ID " + map.getId() + " will be restored across reboots without need for re-rendering.");
                     }
                 }
             }
