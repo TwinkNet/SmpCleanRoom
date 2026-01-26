@@ -9,7 +9,7 @@ features:
     enabled: true
     withheld_maps:
       - "EXAMPLE318649F10AC5860230CA0DA5F" # An MD5 hash of the contents of a map
-      - "BA1251263DE319076A6EB1E12EE33FCB" # Obtainable in-game by holding a map and running /hash
+      - "EXAMPLE3DE319076A6EB1E122EE33FCB" # Obtainable in-game by holding a map and running /hash
     withhold_all_maps: false # You can optionally choose to ban every single map within the prescribed spawn radius.
     use_alternate_method: false # Change this to true if your server obfuscates the real Map ID in MapData packets.
     obfuscation:

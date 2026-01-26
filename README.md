@@ -23,7 +23,7 @@ Your real playerbase, the people who just want to mind their own business and do
 This plugin employs a feature that can filter configurable words out of signs within a configurable proximity to spawn, both newly placed and existing, without deleting the sign's real data. Actual sign data is **not modified**, only the packets that are sent to the client are modified. 
 
 ### Mapdata Withholding
-This plugin employs a feature that can withhold map data packets for players within a configurable proximity to spawn. Affected players will not see the contents of maps whether they're in an Item Frame or in their hands. You can choose to withhold only certain map IDs (and their duplicates, automatically obtained by the plugin), or you can withhold all maps. Actual map data is **not modified**, only the packets that are sent to the client are modified.
+This plugin employs a feature that can withhold map data packets for players within a configurable proximity to spawn. Affected players will not see the contents of maps whether they're in an Item Frame or in their hands. You can choose to withhold only certain maps (and their duplicates, automatically obtained by the plugin), or you can withhold all maps. Actual map data is **not modified**, only the packets that are sent to the client are modified.
 
 ## Configurable Bypassing
 You can optionally set up Bypassing so that certain players are not affected by these features in the spawn radius. You can:
