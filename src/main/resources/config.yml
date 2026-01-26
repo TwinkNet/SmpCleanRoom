@@ -19,8 +19,11 @@ features:
       # If replace_with_id_when_possible is set to "false", the map will be replaced with a solid colour or random noise according to obfuscate_with_noise
       # If replace_with_id_when_possible is set to a Map ID, the server will obfuscate the banned map by rendering that Map ID over it whenever possible.
       #
-      # Warning: it is recommended to only use the Map ID of a locked map that any player has a high chance of running into. Currently, the plugin
-      # will use the default obfuscation method UNTIL any single player on your server sees the map in-game that you have set here.
+      # Pro Tip: it is recommended to only use the Map ID of a locked map.
+      # After changing or updating this value, the plugin will use the
+      # default obfuscation method UNTIL any single player on your server
+      # sees the map in-game that you have set here. When a player discovers
+      # the map, the required data will be saved for use across reboots.
       #
       # replace_with_id_when_possible: 67 # This would make a banned map look like map_67.dat.
       #
