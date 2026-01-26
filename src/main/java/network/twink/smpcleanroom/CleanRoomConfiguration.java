@@ -1,9 +1,8 @@
 package network.twink.smpcleanroom;
 
+import java.io.File;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.plugin.Plugin;
-
-import java.io.File;
 
 public class CleanRoomConfiguration {
 
@@ -57,7 +56,9 @@ public class CleanRoomConfiguration {
                 parser.set("features.withhold_map_feature.obfuscation.replace_with_id", false);
             case 1:
                 parser.set("version", 2);
-                parser.set("features.withhold_map_feature.obfuscation.replace_with_id_when_possible", parser.get("features.withhold_map_feature.obfuscation.replace_with_id"));
+                parser.set(
+                        "features.withhold_map_feature.obfuscation.replace_with_id_when_possible",
+                        parser.get("features.withhold_map_feature.obfuscation.replace_with_id"));
                 parser.set("features.withhold_map_feature.obfuscation.replace_with_id", MOVED);
                 parser.set("features.withhold_map_feature.obfuscation.obfuscate_with_noise", true);
         }

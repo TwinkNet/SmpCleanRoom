@@ -8,6 +8,17 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import java.awt.*;
+import java.io.*;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Consumer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -36,18 +47,6 @@ import org.bukkit.map.MapView;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.awt.*;
-import java.io.*;
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.function.Consumer;
 
 public class WithholdMapFeature extends AbstractFeature {
 
@@ -86,8 +85,7 @@ public class WithholdMapFeature extends AbstractFeature {
     }
 
     @Override
-    public void onPreStartup() {
-    }
+    public void onPreStartup() {}
 
     @Override
     public void onStartup() {
@@ -95,10 +93,16 @@ public class WithholdMapFeature extends AbstractFeature {
         if (replaceWithIdWheneverPossible) {
             boolean flag = this.loadSavedRedactionData();
             if (flag) {
-                getPlugin().getLogger().info("Restored Map ID " + savedRedactionData.getMapId() + " from disk. It will be used as the redaction method.");
+                getPlugin()
+                        .getLogger()
+                        .info("Restored Map ID " + savedRedactionData.getMapId()
+                                + " from disk. It will be used as the redaction method.");
             } else {
                 String method = replaceWithNoise ? "random noise" : "solid colour";
-                getPlugin().getLogger().warning("Redaction method \"" + method + "\" will be used until a player discovers Map ID " + replacementId);
+                getPlugin()
+                        .getLogger()
+                        .warning("Redaction method \"" + method + "\" will be used until a player discovers Map ID "
+                                + replacementId);
             }
         }
         if (!useAlternateMethod) {
@@ -156,8 +160,7 @@ public class WithholdMapFeature extends AbstractFeature {
     }
 
     @Override
-    public void onShutdown() {
-    }
+    public void onShutdown() {}
 
     public boolean loadSavedRedactionData() {
         File file = new File(getPlugin().getDataFolder(), "CleanRoomSavedMapData.arr");
@@ -485,8 +488,14 @@ public class WithholdMapFeature extends AbstractFeature {
             }
             if (WithholdMapFeature.this.withholdAll || WithholdMapFeature.this.bannedHashes.contains(this.hash)) {
                 if (replaceWithIdWheneverPossible && replacementId == mapId) {
-                    getPlugin().getLogger().severe("Banned Map ID " + mapId + " is the same as the Map ID you have set to replace banned maps with.");
-                    getPlugin().getLogger().severe("Unexpected behaviour WILL occur, and this message won't go away until you do something about it.");
+                    getPlugin()
+                            .getLogger()
+                            .severe("Banned Map ID " + mapId
+                                    + " is the same as the Map ID you have set to replace banned maps with.");
+                    getPlugin()
+                            .getLogger()
+                            .severe(
+                                    "Unexpected behaviour WILL occur, and this message won't go away until you do something about it.");
                 }
                 banThisMap(map, canvas, player);
             } else {
@@ -605,7 +614,11 @@ public class WithholdMapFeature extends AbstractFeature {
                 }
                 if (isCaptured()) {
                     if (WithholdMapFeature.this.saveRedactionData(map.getId(), getPixelArr())) {
-                        WithholdMapFeature.this.getPlugin().getLogger().info("Map ID " + map.getId() + " will be restored across reboots without need for re-rendering.");
+                        WithholdMapFeature.this
+                                .getPlugin()
+                                .getLogger()
+                                .info("Map ID " + map.getId()
+                                        + " will be restored across reboots without need for re-rendering.");
                     }
                 }
             }

@@ -7,6 +7,7 @@ public class SerializableRedactionData implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
     private int mapId;
     private int[] rgbArr;
 
