@@ -1,5 +1,5 @@
 name: CompliantCleanRoom
-version: '1.0'
+version: 'RC-2026.01.25'
 author: "Twink Enterprises"
 main: network.twink.smpcleanroom.CompliantCleanRoom
 api-version: '1.21'
