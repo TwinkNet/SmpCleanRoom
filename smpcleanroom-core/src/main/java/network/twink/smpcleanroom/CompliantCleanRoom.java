@@ -16,8 +16,7 @@ public final class CompliantCleanRoom extends JavaPlugin {
         BypassManager bypassManager = new BypassManager(this, this.configuration);
         featureManager = new FeatureManager(this, bypassManager, configuration);
         this.getLogger()
-                .info("loaded " + FeatureManager.getBypassManager().getTotalBypassCount()
-                        + " registered bypasses.");
+                .info("loaded " + FeatureManager.getBypassManager().getTotalBypassCount() + " registered bypasses.");
         this.getLogger().info("loaded " + featureManager.getTotalFeatureCount() + " registered features.");
         featureManager.onPreStartup();
     }

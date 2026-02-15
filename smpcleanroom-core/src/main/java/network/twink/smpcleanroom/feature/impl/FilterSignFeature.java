@@ -13,12 +13,10 @@ import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import com.comphenix.protocol.wrappers.nbt.NbtList;
 import io.papermc.paper.event.packet.PlayerChunkLoadEvent;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
@@ -43,8 +41,7 @@ public class FilterSignFeature extends AbstractFeature {
     }
 
     @Override
-    public void onPreStartup() {
-    }
+    public void onPreStartup() {}
 
     @Override
     public void onStartup() {
@@ -62,13 +59,15 @@ public class FilterSignFeature extends AbstractFeature {
                             }
                         }
                         if (FeatureManager.getBypassManager().isCriteriaMet(event.getPlayer())) return;
-                        if (FeatureManager
-                                .getBypassManager()
+                        if (FeatureManager.getBypassManager()
                                 .isCriteriaMet(event.getPlayer().getLocation())) return;
                         PacketContainer packet = event.getPacket();
                         boolean flag = packet.getBlockEntityTypeModifier()
-                                .read(0)
-                                .equals(WrappedRegistrable.blockEntityType("sign"));
+                                        .read(0)
+                                        .equals(WrappedRegistrable.blockEntityType("sign"))
+                                || packet.getBlockEntityTypeModifier()
+                                        .read(0)
+                                        .equals(WrappedRegistrable.blockEntityType("hanging_sign"));
                         if (!flag) return;
                         NbtCompound nbt = (NbtCompound) packet.getNbtModifier().read(0);
                         NbtCompound compoundTagFront = null;
@@ -121,12 +120,14 @@ public class FilterSignFeature extends AbstractFeature {
     }
 
     @Override
-    public void onShutdown() {
-    }
+    public void onShutdown() {}
 
     @EventHandler
     public void onLoad(PlayerChunkLoadEvent event) {
-        if (!FeatureManager.getBypassManager().isCriteriaMet(event.getChunk().getBlock(0, event.getWorld().getMinHeight(), 0).getLocation()))
+        if (!FeatureManager.getBypassManager()
+                .isCriteriaMet(event.getChunk()
+                        .getBlock(0, event.getWorld().getMinHeight(), 0)
+                        .getLocation()))
             for (BlockState tileEntity : event.getChunk().getTileEntities()) {
                 if (tileEntity instanceof Sign sign) {
                     List<String> frontSide = new ArrayList<>();

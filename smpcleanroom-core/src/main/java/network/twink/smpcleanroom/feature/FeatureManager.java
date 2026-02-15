@@ -1,5 +1,7 @@
 package network.twink.smpcleanroom.feature;
 
+import java.util.ArrayList;
+import java.util.List;
 import network.twink.smpcleanroom.CleanRoomConfiguration;
 import network.twink.smpcleanroom.bypass.BypassManager;
 import network.twink.smpcleanroom.event.CleanroomRegistrationEvent;
@@ -8,9 +10,6 @@ import network.twink.smpcleanroom.feature.impl.WithholdMapFeature;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class FeatureManager implements IFeatureManager {
 
@@ -42,13 +41,7 @@ public class FeatureManager implements IFeatureManager {
             boolean useNoise =
                     parser.getBoolean(FEATURES_ + "withhold_map_feature.obfuscation.obfuscate_with_noise", true);
             registerFeature(new WithholdMapFeature(
-                    plugin,
-                    defaultMapIdBanList,
-                    withHoldAll,
-                    useAlternateMethod,
-                    replaceWithId,
-                    useNoise,
-                    replaceId));
+                    plugin, defaultMapIdBanList, withHoldAll, useAlternateMethod, replaceWithId, useNoise, replaceId));
         }
         if (parser.getBoolean(FEATURES_ + "filter_sign_feature.enabled", true)) {
             List<String> defaultBannedWords = new ArrayList<>();
