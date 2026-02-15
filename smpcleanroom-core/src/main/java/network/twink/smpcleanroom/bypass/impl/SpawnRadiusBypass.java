@@ -15,8 +15,7 @@ public class SpawnRadiusBypass extends AbstractBypass {
     }
 
     @Override
-    public boolean isCriteriaMet(Plugin plugin, Player player) {
-        Location location = player.getLocation();
+    public boolean isCriteriaMet(Plugin plugin, Location location) {
         return location.getBlockX() > globalSpawnRadius || location.getBlockZ() > globalSpawnRadius;
     }
 }

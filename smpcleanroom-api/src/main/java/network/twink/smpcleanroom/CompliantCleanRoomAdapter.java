@@ -7,12 +7,12 @@ import network.twink.smpcleanroom.feature.IFeature;
 import network.twink.smpcleanroom.feature.IFeatureManager;
 import org.bukkit.plugin.Plugin;
 
-@SuppressWarnings({"CallToPrintStackTrace", "JavaReflectionInvocation"})
+@SuppressWarnings({"CallToPrintStackTrace"})
 public class CompliantCleanRoomAdapter {
 
     private static final String BASE_PKG = "network.twink.smpcleanroom";
     private static final String PLUGIN_CLASS = "CompliantCleanRoom";
-    private static final String FEATURE_MANAGER_CLASS = "CompliantCleanRoom";
+    private static final String FEATURE_MANAGER_CLASS = "FeatureManager";
 
     private IBypassManager cachedBypassManager = null;
     private IFeatureManager cachedFeatureManager = null;
@@ -29,7 +29,7 @@ public class CompliantCleanRoomAdapter {
         try {
             if (cachedBypassManager != null) return cachedBypassManager;
             Class<?> clazz = Class.forName(BASE_PKG + ".feature." + FEATURE_MANAGER_CLASS);
-            Object object = clazz.getDeclaredMethod("getBypassManager").invoke(null);
+            Object object = clazz.getDeclaredMethod("getBypassManager").invoke(getFeatureManager());
             if (object instanceof IBypassManager) {
                 cachedBypassManager = (IBypassManager) object;
                 return cachedBypassManager;
