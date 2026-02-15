@@ -62,7 +62,6 @@ public class WithholdMapFeature extends AbstractFeature {
     private SerializableRedactionData savedRedactionData;
 
     public WithholdMapFeature(
-            FeatureManager featureManager,
             Plugin plugin,
             int radius,
             List<String> bannedHashes,
@@ -71,7 +70,7 @@ public class WithholdMapFeature extends AbstractFeature {
             boolean replaceWithIdWheneverPossible,
             boolean replaceWithNoise,
             int replacementId) {
-        super(featureManager, plugin, "withhold_map_feature");
+        super(plugin, "withhold_map_feature");
         this.bannedHashes = bannedHashes;
         this.withholdAll = withholdAll;
         this.radius = radius;
@@ -522,11 +521,11 @@ public class WithholdMapFeature extends AbstractFeature {
                 unbanThisMap(canvas);
                 return;
             }
-            if (getFeatureManager().getBypassManager().isCriteriaMet(player)) {
+            if (CompliantCleanRoom.getFeatureManager().getBypassManager().isCriteriaMet(player)) {
                 unbanThisMap(canvas);
                 return;
             }
-            if (getFeatureManager().getBypassManager().isCriteriaMet(player.getLocation())) {
+            if (CompliantCleanRoom.getFeatureManager().getBypassManager().isCriteriaMet(player.getLocation())) {
                 unbanThisMap(canvas);
                 return;
             }

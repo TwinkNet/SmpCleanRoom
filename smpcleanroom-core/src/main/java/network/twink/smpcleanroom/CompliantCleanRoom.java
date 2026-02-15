@@ -7,14 +7,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class CompliantCleanRoom extends JavaPlugin {
 
     private CleanRoomConfiguration configuration;
-    private FeatureManager featureManager;
+    private static FeatureManager featureManager;
 
     @Override
     public void onLoad() {
         this.getLogger().info("Initialising...");
         this.configuration = new CleanRoomConfiguration(this);
         BypassManager bypassManager = new BypassManager(this, this.configuration);
-        this.featureManager = new FeatureManager(this, bypassManager, configuration);
+        featureManager = new FeatureManager(this, bypassManager, configuration);
         this.getLogger()
                 .info("loaded " + this.featureManager.getBypassManager().getTotalBypassCount()
                         + " registered bypasses.");
@@ -30,6 +30,10 @@ public final class CompliantCleanRoom extends JavaPlugin {
     @Override
     public void onDisable() {
         featureManager.onShutdown();
+    }
+
+    public static FeatureManager getFeatureManager() {
+        return featureManager;
     }
 
     public CleanRoomConfiguration getConfiguration() {

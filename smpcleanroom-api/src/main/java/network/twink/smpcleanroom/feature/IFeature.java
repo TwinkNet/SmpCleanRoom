@@ -12,6 +12,4 @@ public interface IFeature extends Listener {
     void onShutdown();
 
     Plugin getPlugin();
-
-    FeatureManager getFeatureManager();
 }

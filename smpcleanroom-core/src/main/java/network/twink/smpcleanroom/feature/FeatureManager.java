@@ -15,12 +15,12 @@ public class FeatureManager {
     private static final String FEATURES_ = "features.";
     private static final String VALUES_ = "values.";
     private final List<IFeature> featureRegistry;
-    private final BypassManager bypassManager;
+    private static BypassManager BYPASS_MANAGER;
 
     public FeatureManager(Plugin plugin, BypassManager bypassManager, CleanRoomConfiguration config) {
         if (!config.isLoaded()) throw new IllegalStateException("CleanRoomConfiguration must be loaded.");
         YMLParser parser = config.getParser();
-        this.bypassManager = bypassManager;
+        BYPASS_MANAGER = bypassManager;
         int radius = parser.getInt(VALUES_ + "spawn_radius", 5000);
         featureRegistry = new ArrayList<>();
         if (parser.getBoolean(FEATURES_ + "withhold_map_feature.enabled", true)) {
@@ -41,7 +41,6 @@ public class FeatureManager {
             boolean useNoise =
                     parser.getBoolean(FEATURES_ + "withhold_map_feature.obfuscation.obfuscate_with_noise", true);
             featureRegistry.add(new WithholdMapFeature(
-                    this,
                     plugin,
                     radius,
                     defaultMapIdBanList,
@@ -58,7 +57,7 @@ public class FeatureManager {
             if (parser.exists(key)) {
                 defaultBannedWords = parser.getStringList(key);
             }
-            featureRegistry.add(new FilterSignFeature(this, plugin, defaultBannedWords, radius));
+            featureRegistry.add(new FilterSignFeature(plugin, defaultBannedWords, radius));
         }
     }
 
@@ -84,7 +83,7 @@ public class FeatureManager {
         return featureRegistry.size();
     }
 
-    public BypassManager getBypassManager() {
-        return bypassManager;
+    public static BypassManager getBypassManager() {
+        return BYPASS_MANAGER;
     }
 }
