@@ -23,6 +23,7 @@ import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import network.twink.smpcleanroom.feature.AbstractFeature;
 import network.twink.smpcleanroom.feature.FeatureManager;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.HangingSign;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.block.sign.SignSide;
@@ -124,56 +125,61 @@ public class FilterSignFeature extends AbstractFeature {
 
     @EventHandler
     public void onLoad(PlayerChunkLoadEvent event) {
-        if (!FeatureManager.getBypassManager()
+        if (FeatureManager.getBypassManager()
                 .isCriteriaMet(event.getChunk()
                         .getBlock(0, event.getWorld().getMinHeight(), 0)
-                        .getLocation()))
-            for (BlockState tileEntity : event.getChunk().getTileEntities()) {
-                if (tileEntity instanceof Sign sign) {
-                    List<String> frontSide = new ArrayList<>();
-                    List<String> backSide = new ArrayList<>();
-                    @NotNull SignSide signSide = sign.getSide(Side.FRONT);
-                    for (int i = 0; i < signSide.lines().size(); i++) {
-                        Component component = signSide.lines().get(i);
-                        if (component instanceof TextComponent textComponent) {
-                            for (String bannedWord : bannedWords) {
-                                component = textComponent.replaceText(builder -> {
-                                    builder.match("\\b" + bannedWord + "\\b");
-                                    builder.replacement("?");
-                                });
-                            }
-                            frontSide.add(JSONComponentSerializer.json().serialize(component));
-                        }
-                    }
-                    signSide = sign.getSide(Side.BACK);
-                    for (int i = 0; i < signSide.lines().size(); i++) {
-                        Component component = signSide.lines().get(i);
+                        .getLocation())) {
+            return;
+        }
+        for (BlockState tileEntity : event.getChunk().getTileEntities()) {
+            if (tileEntity instanceof Sign sign) {
+                List<String> frontSide = new ArrayList<>();
+                List<String> backSide = new ArrayList<>();
+                @NotNull SignSide signSide = sign.getSide(Side.FRONT);
+                for (int i = 0; i < signSide.lines().size(); i++) {
+                    Component component = signSide.lines().get(i);
+                    if (component instanceof TextComponent textComponent) {
                         for (String bannedWord : bannedWords) {
-                            component = component.replaceText(builder -> {
-                                builder.match(Pattern.compile("(?i)\\b" + Pattern.quote(bannedWord) + "\\b"));
+                            component = textComponent.replaceText(builder -> {
+                                builder.match("\\b" + bannedWord + "\\b");
                                 builder.replacement("?");
                             });
                         }
-                        backSide.add(JSONComponentSerializer.json().serialize(component));
+                        frontSide.add(JSONComponentSerializer.json().serialize(component));
                     }
-                    PacketContainer container = new PacketContainer(PacketType.Play.Server.TILE_ENTITY_DATA);
-                    BlockPosition pos = new BlockPosition(sign.getX(), sign.getY(), sign.getZ());
-                    container.getBlockPositionModifier().write(0, pos);
-                    container.getBlockEntityTypeModifier().write(0, WrappedRegistrable.blockEntityType("sign"));
-                    NbtCompound rootCompound =
-                            (NbtCompound) container.getNbtModifier().read(0);
-                    NbtCompound frontCompound = NbtFactory.ofCompound("front_text");
-                    NbtCompound backCompound = NbtFactory.ofCompound("back_text");
-                    NbtList<String> frontMessages = NbtFactory.ofList("messages", frontSide);
-                    NbtList<String> backMessages = NbtFactory.ofList("messages", backSide);
-                    frontCompound.put(frontMessages);
-                    backCompound.put(backMessages);
-                    rootCompound.put(frontCompound);
-                    rootCompound.put(backCompound);
-                    container.getNbtModifier().write(0, rootCompound);
-                    container.setMeta("Mr. Clean", "Scrubbed");
-                    protocolManager.sendServerPacket(event.getPlayer(), container);
                 }
+                signSide = sign.getSide(Side.BACK);
+                for (int i = 0; i < signSide.lines().size(); i++) {
+                    Component component = signSide.lines().get(i);
+                    for (String bannedWord : bannedWords) {
+                        component = component.replaceText(builder -> {
+                            builder.match(Pattern.compile("(?i)\\b" + Pattern.quote(bannedWord) + "\\b"));
+                            builder.replacement("?");
+                        });
+                    }
+                    backSide.add(JSONComponentSerializer.json().serialize(component));
+                }
+                PacketContainer container = new PacketContainer(PacketType.Play.Server.TILE_ENTITY_DATA);
+                BlockPosition pos = new BlockPosition(sign.getX(), sign.getY(), sign.getZ());
+                container.getBlockPositionModifier().write(0, pos);
+                boolean flag = (tileEntity instanceof HangingSign);
+                container
+                        .getBlockEntityTypeModifier()
+                        .write(0, WrappedRegistrable.blockEntityType(flag ? "hanging_sign" : "sign"));
+                NbtCompound rootCompound =
+                        (NbtCompound) container.getNbtModifier().read(0);
+                NbtCompound frontCompound = NbtFactory.ofCompound("front_text");
+                NbtCompound backCompound = NbtFactory.ofCompound("back_text");
+                NbtList<String> frontMessages = NbtFactory.ofList("messages", frontSide);
+                NbtList<String> backMessages = NbtFactory.ofList("messages", backSide);
+                frontCompound.put(frontMessages);
+                backCompound.put(backMessages);
+                rootCompound.put(frontCompound);
+                rootCompound.put(backCompound);
+                container.getNbtModifier().write(0, rootCompound);
+                container.setMeta("Mr. Clean", "Scrubbed");
+                protocolManager.sendServerPacket(event.getPlayer(), container);
             }
+        }
     }
 }

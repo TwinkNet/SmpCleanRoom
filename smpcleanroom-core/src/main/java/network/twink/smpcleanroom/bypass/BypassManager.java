@@ -76,12 +76,14 @@ public class BypassManager implements IBypassManager {
             for (IBypass iBypass : bypassRegistry) {
                 boolean flag = iBypass.isCriteriaMet(getPlugin(), loc);
                 bool.setFlag(flag, iBypass.isImmune());
+                if (flag && iBypass.isImmune()) return flag;
             }
             return bool.getFlag();
         } else {
             boolean flag = false;
             for (IBypass iBypass : bypassRegistry) {
                 flag = iBypass.isCriteriaMet(getPlugin(), loc);
+                if (flag && iBypass.isImmune()) return flag;
             }
             return flag;
         }
