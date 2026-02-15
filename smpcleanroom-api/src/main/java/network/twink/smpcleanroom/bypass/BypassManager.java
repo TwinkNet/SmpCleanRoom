@@ -1,7 +1,5 @@
 package network.twink.smpcleanroom.bypass;
 
-import java.util.ArrayList;
-import java.util.List;
 import network.twink.smpcleanroom.CleanRoomConfiguration;
 import network.twink.smpcleanroom.bypass.impl.JoinDateBypass;
 import network.twink.smpcleanroom.bypass.impl.PermissionBypass;
@@ -10,6 +8,9 @@ import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BypassManager {
 

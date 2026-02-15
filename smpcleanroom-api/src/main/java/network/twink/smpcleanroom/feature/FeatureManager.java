@@ -1,13 +1,14 @@
 package network.twink.smpcleanroom.feature;
 
-import java.util.ArrayList;
-import java.util.List;
 import network.twink.smpcleanroom.CleanRoomConfiguration;
 import network.twink.smpcleanroom.bypass.BypassManager;
 import network.twink.smpcleanroom.feature.impl.FilterSignFeature;
 import network.twink.smpcleanroom.feature.impl.WithholdMapFeature;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.plugin.Plugin;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FeatureManager {
 
