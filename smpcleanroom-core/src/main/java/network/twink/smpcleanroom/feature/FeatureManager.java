@@ -2,15 +2,17 @@ package network.twink.smpcleanroom.feature;
 
 import network.twink.smpcleanroom.CleanRoomConfiguration;
 import network.twink.smpcleanroom.bypass.BypassManager;
+import network.twink.smpcleanroom.event.CleanroomRegistrationEvent;
 import network.twink.smpcleanroom.feature.impl.FilterSignFeature;
 import network.twink.smpcleanroom.feature.impl.WithholdMapFeature;
 import network.twink.smpcleanroom.util.yml.YMLParser;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FeatureManager {
+public class FeatureManager implements IFeatureManager {
 
     private static final String FEATURES_ = "features.";
     public static final String VALUES_ = "values.";
@@ -39,7 +41,7 @@ public class FeatureManager {
             }
             boolean useNoise =
                     parser.getBoolean(FEATURES_ + "withhold_map_feature.obfuscation.obfuscate_with_noise", true);
-            featureRegistry.add(new WithholdMapFeature(
+            registerFeature(new WithholdMapFeature(
                     plugin,
                     defaultMapIdBanList,
                     withHoldAll,
@@ -55,8 +57,9 @@ public class FeatureManager {
             if (parser.exists(key)) {
                 defaultBannedWords = parser.getStringList(key);
             }
-            featureRegistry.add(new FilterSignFeature(plugin, defaultBannedWords));
+            registerFeature(new FilterSignFeature(plugin, defaultBannedWords));
         }
+        Bukkit.getPluginManager().callEvent(new CleanroomRegistrationEvent(this, getBypassManager()));
     }
 
     public void onPreStartup() {
@@ -79,6 +82,11 @@ public class FeatureManager {
 
     public int getTotalFeatureCount() {
         return featureRegistry.size();
+    }
+
+    @Override
+    public void registerFeature(IFeature feature) {
+        featureRegistry.add(feature);
     }
 
     public static BypassManager getBypassManager() {

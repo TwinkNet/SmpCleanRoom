@@ -26,7 +26,6 @@ import net.kyori.adventure.text.format.TextColor;
 import network.twink.smpcleanroom.CompliantCleanRoom;
 import network.twink.smpcleanroom.feature.AbstractFeature;
 import network.twink.smpcleanroom.feature.FeatureManager;
-import network.twink.smpcleanroom.util.LocationUtil;
 import network.twink.smpcleanroom.util.SerializableRedactionData;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.Bukkit;
