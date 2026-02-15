@@ -4,6 +4,8 @@ import network.twink.smpcleanroom.CleanRoomConfiguration;
 import network.twink.smpcleanroom.bypass.impl.JoinDateBypass;
 import network.twink.smpcleanroom.bypass.impl.PermissionBypass;
 import network.twink.smpcleanroom.bypass.impl.PlaytimeBypass;
+import network.twink.smpcleanroom.bypass.impl.SpawnRadiusBypass;
+import network.twink.smpcleanroom.feature.FeatureManager;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -35,6 +37,10 @@ public class BypassManager {
         if (parser.getBoolean(BYPASSES_ + "permission.enabled", false)) {
             String permission = parser.getString(BYPASSES_ + "permission.perm");
             bypassRegistry.add(new PermissionBypass(permission));
+        }
+        /* location */ {
+            int radius = parser.getInt(FeatureManager.VALUES_ + "spawn_radius", 5000);
+            bypassRegistry.add(new SpawnRadiusBypass(radius));
         }
         mode = Mode.valueOf(parser.getString(BYPASSES_ + "mode").toUpperCase());
     }

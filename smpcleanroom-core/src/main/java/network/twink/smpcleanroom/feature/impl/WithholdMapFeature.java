@@ -51,7 +51,6 @@ import org.jetbrains.annotations.Nullable;
 public class WithholdMapFeature extends AbstractFeature {
 
     private ProtocolManager protocolManager;
-    private final int radius;
     private final boolean withholdAll;
     private final boolean useAlternateMethod;
     private final boolean replaceWithIdWheneverPossible;
@@ -63,7 +62,6 @@ public class WithholdMapFeature extends AbstractFeature {
 
     public WithholdMapFeature(
             Plugin plugin,
-            int radius,
             List<String> bannedHashes,
             boolean withholdAll,
             boolean useAlternateMethod,
@@ -73,7 +71,6 @@ public class WithholdMapFeature extends AbstractFeature {
         super(plugin, "withhold_map_feature");
         this.bannedHashes = bannedHashes;
         this.withholdAll = withholdAll;
-        this.radius = radius;
         this.replaceWithNoise = replaceWithNoise;
         this.useAlternateMethod = useAlternateMethod;
         this.replaceWithIdWheneverPossible = replaceWithIdWheneverPossible;
@@ -517,15 +514,11 @@ public class WithholdMapFeature extends AbstractFeature {
         }
 
         public void banThisMap(@NotNull MapView map, @NotNull MapCanvas canvas, @NotNull Player player) {
-            if (!LocationUtil.isLocationInsideSpawnRadius(player.getLocation(), WithholdMapFeature.this.radius)) {
+            if (FeatureManager.getBypassManager().isCriteriaMet(player)) {
                 unbanThisMap(canvas);
                 return;
             }
-            if (CompliantCleanRoom.getFeatureManager().getBypassManager().isCriteriaMet(player)) {
-                unbanThisMap(canvas);
-                return;
-            }
-            if (CompliantCleanRoom.getFeatureManager().getBypassManager().isCriteriaMet(player.getLocation())) {
+            if (FeatureManager.getBypassManager().isCriteriaMet(player.getLocation())) {
                 unbanThisMap(canvas);
                 return;
             }

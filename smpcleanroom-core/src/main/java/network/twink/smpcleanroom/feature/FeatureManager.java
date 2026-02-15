@@ -13,7 +13,7 @@ import java.util.List;
 public class FeatureManager {
 
     private static final String FEATURES_ = "features.";
-    private static final String VALUES_ = "values.";
+    public static final String VALUES_ = "values.";
     private final List<IFeature> featureRegistry;
     private static BypassManager BYPASS_MANAGER;
 
@@ -21,7 +21,6 @@ public class FeatureManager {
         if (!config.isLoaded()) throw new IllegalStateException("CleanRoomConfiguration must be loaded.");
         YMLParser parser = config.getParser();
         BYPASS_MANAGER = bypassManager;
-        int radius = parser.getInt(VALUES_ + "spawn_radius", 5000);
         featureRegistry = new ArrayList<>();
         if (parser.getBoolean(FEATURES_ + "withhold_map_feature.enabled", true)) {
             List<String> defaultMapIdBanList = new ArrayList<>();
@@ -42,7 +41,6 @@ public class FeatureManager {
                     parser.getBoolean(FEATURES_ + "withhold_map_feature.obfuscation.obfuscate_with_noise", true);
             featureRegistry.add(new WithholdMapFeature(
                     plugin,
-                    radius,
                     defaultMapIdBanList,
                     withHoldAll,
                     useAlternateMethod,
@@ -57,7 +55,7 @@ public class FeatureManager {
             if (parser.exists(key)) {
                 defaultBannedWords = parser.getStringList(key);
             }
-            featureRegistry.add(new FilterSignFeature(plugin, defaultBannedWords, radius));
+            featureRegistry.add(new FilterSignFeature(plugin, defaultBannedWords));
         }
     }
 

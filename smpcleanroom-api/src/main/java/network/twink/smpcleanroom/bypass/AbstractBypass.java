@@ -14,7 +14,7 @@ public abstract class AbstractBypass implements IBypass {
 
     /**
      * Immunity is whether this bypass observed the rules set by the mode configuration value
-     * By default, this will only be used by the permission bypass.
+     * By default, this will only be used by the permission and the spawn radius bypass.
      * @return Whether this bypass is immune.
      */
     public boolean isImmune() {

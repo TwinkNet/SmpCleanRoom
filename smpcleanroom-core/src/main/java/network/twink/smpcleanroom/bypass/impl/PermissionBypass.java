@@ -9,7 +9,7 @@ public class PermissionBypass extends AbstractBypass {
     private final String bypassPermission;
 
     public PermissionBypass(String bypassPermission) {
-        super();
+        super(true);
         this.bypassPermission = bypassPermission;
     }
 

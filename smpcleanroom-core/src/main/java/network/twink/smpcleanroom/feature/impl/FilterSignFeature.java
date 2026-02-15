@@ -13,10 +13,12 @@ import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import com.comphenix.protocol.wrappers.nbt.NbtList;
 import io.papermc.paper.event.packet.PlayerChunkLoadEvent;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
@@ -36,16 +38,15 @@ public class FilterSignFeature extends AbstractFeature {
 
     private ProtocolManager protocolManager;
     private final List<String> bannedWords;
-    private int radius;
 
-    public FilterSignFeature(Plugin plugin, List<String> bannedWords, int radius) {
+    public FilterSignFeature(Plugin plugin, List<String> bannedWords) {
         super(plugin, "filter_sign_feature");
         this.bannedWords = bannedWords;
-        this.radius = radius;
     }
 
     @Override
-    public void onPreStartup() {}
+    public void onPreStartup() {
+    }
 
     @Override
     public void onStartup() {
@@ -62,12 +63,8 @@ public class FilterSignFeature extends AbstractFeature {
                                 return;
                             }
                         }
-                        if (!LocationUtil.isLocationInsideSpawnRadius(
-                                event.getPlayer().getLocation(), radius)) {
-                            return;
-                        }
-                        if (CompliantCleanRoom.getFeatureManager().getBypassManager().isCriteriaMet(event.getPlayer())) return;
-                        if (CompliantCleanRoom.getFeatureManager()
+                        if (FeatureManager.getBypassManager().isCriteriaMet(event.getPlayer())) return;
+                        if (FeatureManager
                                 .getBypassManager()
                                 .isCriteriaMet(event.getPlayer().getLocation())) return;
                         PacketContainer packet = event.getPacket();
@@ -126,12 +123,12 @@ public class FilterSignFeature extends AbstractFeature {
     }
 
     @Override
-    public void onShutdown() {}
+    public void onShutdown() {
+    }
 
     @EventHandler
     public void onLoad(PlayerChunkLoadEvent event) {
-        if (LocationUtil.isLocationInsideSpawnRadius(
-                event.getChunk().getBlock(0, event.getWorld().getMinHeight(), 0).getLocation(), radius))
+        if (!FeatureManager.getBypassManager().isCriteriaMet(event.getChunk().getBlock(0, event.getWorld().getMinHeight(), 0).getLocation()))
             for (BlockState tileEntity : event.getChunk().getTileEntities()) {
                 if (tileEntity instanceof Sign sign) {
                     List<String> frontSide = new ArrayList<>();
