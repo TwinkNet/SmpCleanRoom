@@ -86,7 +86,8 @@ public class CompliantCleanRoomAdapter {
                 if (clazz == null) {
                     throw new ClassNotFoundException(BASE_PKG + "." + PLUGIN_CLASS);
                 }
-                clazz.getDeclaredMethod("queueRegisterFeature").invoke(null, plugin, supplier);
+                clazz.getDeclaredMethod("queueRegisterFeature", Plugin.class, Supplier.class)
+                        .invoke(null, (Plugin) plugin, (Supplier<IFeature>) supplier);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -101,7 +102,8 @@ public class CompliantCleanRoomAdapter {
                 if (clazz == null) {
                     throw new ClassNotFoundException(BASE_PKG + "." + PLUGIN_CLASS);
                 }
-                clazz.getDeclaredMethod("queueRegisterBypass").invoke(null, plugin, supplier);
+                clazz.getMethod("queueRegisterBypass", Plugin.class, Supplier.class)
+                        .invoke(null, (Plugin) plugin, (Supplier<IBypass>) supplier);
             }
         } catch (Exception e) {
             e.printStackTrace();

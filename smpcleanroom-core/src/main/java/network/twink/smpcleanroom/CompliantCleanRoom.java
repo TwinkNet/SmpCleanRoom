@@ -6,10 +6,13 @@ import network.twink.smpcleanroom.bypass.BypassManager;
 import network.twink.smpcleanroom.bypass.IBypass;
 import network.twink.smpcleanroom.feature.FeatureManager;
 import network.twink.smpcleanroom.feature.IFeature;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class CompliantCleanRoom extends JavaPlugin {
+public final class CompliantCleanRoom extends JavaPlugin implements Listener {
 
     private CleanRoomConfiguration configuration;
     private static FeatureManager featureManager;
@@ -27,6 +30,29 @@ public final class CompliantCleanRoom extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        this.getServer().getPluginManager().registerEvents(this, this);
+    }
+
+    @Override
+    public void onDisable() {
+        featureManager.onShutdown();
+    }
+
+    public static FeatureManager getFeatureManager() {
+        return featureManager;
+    }
+
+    public CleanRoomConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    @EventHandler
+    public void onInit(WorldInitEvent event) {
+        // we have to load stuff here otherwise we will have issues with third party stuff
+        // throwing exceptions because technically their plugins aren't enabled yet.
+        if (maybeTooLateToRegister) {
+            return;
+        }
         while (!thirdPartyFeatures.isEmpty()) {
             IFeature feature = thirdPartyFeatures.pop().get();
             if (feature != null) getFeatureManager().registerFeature(feature);
@@ -41,19 +67,6 @@ public final class CompliantCleanRoom extends JavaPlugin {
                         + " registered bypasses.");
         this.getLogger().info("loaded " + featureManager.getTotalFeatureCount() + " registered features.");
         featureManager.onStartup();
-    }
-
-    @Override
-    public void onDisable() {
-        featureManager.onShutdown();
-    }
-
-    public static FeatureManager getFeatureManager() {
-        return featureManager;
-    }
-
-    public CleanRoomConfiguration getConfiguration() {
-        return configuration;
     }
 
     public static void queueRegisterFeature(Plugin plugin, Supplier<IFeature> featureSupplier) {
