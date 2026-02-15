@@ -1,7 +1,0 @@
-name: CompliantCleanRoom
-version: 'RC-2026.01.26'
-author: "Twink Enterprises"
-main: network.twink.smpcleanroom.CompliantCleanRoom
-api-version: '1.21'
-folia-supported: true
-depend: [ ProtocolLib ]
