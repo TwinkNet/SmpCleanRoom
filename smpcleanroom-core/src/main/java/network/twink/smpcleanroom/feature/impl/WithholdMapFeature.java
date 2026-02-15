@@ -25,7 +25,6 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import network.twink.smpcleanroom.CompliantCleanRoom;
 import network.twink.smpcleanroom.feature.AbstractFeature;
-import network.twink.smpcleanroom.feature.FeatureManager;
 import network.twink.smpcleanroom.util.SerializableRedactionData;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.Bukkit;
@@ -78,9 +77,6 @@ public class WithholdMapFeature extends AbstractFeature {
             getPlugin().getLogger().info("Will try to render map_" + replacementId + ".dat on banned maps.");
         }
     }
-
-    @Override
-    public void onPreStartup() {}
 
     @Override
     public void onStartup() {
@@ -513,11 +509,11 @@ public class WithholdMapFeature extends AbstractFeature {
         }
 
         public void banThisMap(@NotNull MapView map, @NotNull MapCanvas canvas, @NotNull Player player) {
-            if (FeatureManager.getBypassManager().isCriteriaMet(player)) {
+            if (CompliantCleanRoom.getFeatureManager().getBypassManager().isCriteriaMet(player)) {
                 unbanThisMap(canvas);
                 return;
             }
-            if (FeatureManager.getBypassManager().isCriteriaMet(player.getLocation())) {
+            if (CompliantCleanRoom.getFeatureManager().getBypassManager().isCriteriaMet(player.getLocation())) {
                 unbanThisMap(canvas);
                 return;
             }

@@ -20,8 +20,8 @@ import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import network.twink.smpcleanroom.CompliantCleanRoom;
 import network.twink.smpcleanroom.feature.AbstractFeature;
-import network.twink.smpcleanroom.feature.FeatureManager;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.HangingSign;
 import org.bukkit.block.Sign;
@@ -42,9 +42,6 @@ public class FilterSignFeature extends AbstractFeature {
     }
 
     @Override
-    public void onPreStartup() {}
-
-    @Override
     public void onStartup() {
         protocolManager = ProtocolLibrary.getProtocolManager();
         this.getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
@@ -59,8 +56,11 @@ public class FilterSignFeature extends AbstractFeature {
                                 return;
                             }
                         }
-                        if (FeatureManager.getBypassManager().isCriteriaMet(event.getPlayer())) return;
-                        if (FeatureManager.getBypassManager()
+                        if (CompliantCleanRoom.getFeatureManager()
+                                .getBypassManager()
+                                .isCriteriaMet(event.getPlayer())) return;
+                        if (CompliantCleanRoom.getFeatureManager()
+                                .getBypassManager()
                                 .isCriteriaMet(event.getPlayer().getLocation())) return;
                         PacketContainer packet = event.getPacket();
                         boolean flag = packet.getBlockEntityTypeModifier()
@@ -125,7 +125,8 @@ public class FilterSignFeature extends AbstractFeature {
 
     @EventHandler
     public void onLoad(PlayerChunkLoadEvent event) {
-        if (FeatureManager.getBypassManager()
+        if (CompliantCleanRoom.getFeatureManager()
+                .getBypassManager()
                 .isCriteriaMet(event.getChunk()
                         .getBlock(0, event.getWorld().getMinHeight(), 0)
                         .getLocation())) {

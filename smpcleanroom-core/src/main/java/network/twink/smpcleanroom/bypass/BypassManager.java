@@ -51,6 +51,7 @@ public class BypassManager implements IBypassManager {
     @Override
     public void registerBypass(IBypass bypass) {
         bypassRegistry.add(bypass);
+        plugin.getLogger().info("Registered bypass: " + bypass.getClass().getSimpleName() + ".class");
     }
 
     public boolean isCriteriaMet(Player player) {

@@ -1,9 +1,13 @@
 package network.twink.smpcleanroom;
 
+import java.util.function.Supplier;
+import network.twink.smpcleanroom.bypass.IBypass;
 import network.twink.smpcleanroom.bypass.IBypassManager;
+import network.twink.smpcleanroom.feature.IFeature;
 import network.twink.smpcleanroom.feature.IFeatureManager;
+import org.bukkit.plugin.Plugin;
 
-@SuppressWarnings("CallToPrintStackTrace")
+@SuppressWarnings({"CallToPrintStackTrace", "JavaReflectionInvocation"})
 public class CompliantCleanRoomAdapter {
 
     private static final String BASE_PKG = "network.twink.smpcleanroom";
@@ -12,6 +16,7 @@ public class CompliantCleanRoomAdapter {
 
     private IBypassManager cachedBypassManager = null;
     private IFeatureManager cachedFeatureManager = null;
+    private Class<?> cachedPluginClass = null;
 
     /**
      * You shouldn't actually need to use this, you can obtain the
@@ -46,7 +51,10 @@ public class CompliantCleanRoomAdapter {
     public IFeatureManager getFeatureManager() {
         try {
             if (cachedFeatureManager != null) return cachedFeatureManager;
-            Class<?> clazz = Class.forName(BASE_PKG + "." + PLUGIN_CLASS);
+            Class<?> clazz = getPluginClass();
+            if (clazz == null) {
+                throw new ClassNotFoundException(BASE_PKG + "." + PLUGIN_CLASS);
+            }
             Object object = clazz.getDeclaredMethod("getFeatureManager").invoke(null);
             if (object instanceof IFeatureManager) {
                 cachedFeatureManager = (IFeatureManager) object;
@@ -57,5 +65,46 @@ public class CompliantCleanRoomAdapter {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private Class<?> getPluginClass() {
+        if (cachedPluginClass != null) return cachedPluginClass;
+        try {
+            cachedPluginClass = Class.forName(BASE_PKG + "." + PLUGIN_CLASS);
+            return cachedPluginClass;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void registerFeature(Plugin plugin, IFeature... features) {
+        try {
+            for (IFeature feature : features) {
+                Supplier<IFeature> supplier = () -> feature;
+                Class<?> clazz = getPluginClass();
+                if (clazz == null) {
+                    throw new ClassNotFoundException(BASE_PKG + "." + PLUGIN_CLASS);
+                }
+                clazz.getDeclaredMethod("queueRegisterFeature").invoke(null, plugin, supplier);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void registerBypass(Plugin plugin, IBypass... bypasses) {
+        try {
+            for (IBypass bypass : bypasses) {
+                Supplier<IBypass> supplier = () -> bypass;
+                Class<?> clazz = getPluginClass();
+                if (clazz == null) {
+                    throw new ClassNotFoundException(BASE_PKG + "." + PLUGIN_CLASS);
+                }
+                clazz.getDeclaredMethod("queueRegisterBypass").invoke(null, plugin, supplier);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

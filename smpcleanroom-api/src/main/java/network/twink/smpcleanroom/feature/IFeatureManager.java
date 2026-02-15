@@ -1,8 +1,8 @@
 package network.twink.smpcleanroom.feature;
 
-public interface IFeatureManager {
+import network.twink.smpcleanroom.bypass.IBypassManager;
 
-    void onPreStartup();
+public interface IFeatureManager {
 
     void onStartup();
 
@@ -11,4 +11,6 @@ public interface IFeatureManager {
     int getTotalFeatureCount();
 
     void registerFeature(IFeature feature);
+
+    IBypassManager getBypassManager();
 }

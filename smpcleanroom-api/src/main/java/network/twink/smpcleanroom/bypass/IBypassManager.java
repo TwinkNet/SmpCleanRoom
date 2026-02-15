@@ -3,7 +3,6 @@ package network.twink.smpcleanroom.bypass;
 import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 public interface IBypassManager {
 
@@ -18,6 +17,4 @@ public interface IBypassManager {
     int getTotalBypassCount();
 
     Mode getMode();
-
-    Plugin getPlugin();
 }

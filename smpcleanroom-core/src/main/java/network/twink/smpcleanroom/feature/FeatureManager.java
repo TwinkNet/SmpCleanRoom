@@ -2,13 +2,12 @@ package network.twink.smpcleanroom.feature;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import network.twink.smpcleanroom.CleanRoomConfiguration;
 import network.twink.smpcleanroom.bypass.BypassManager;
-import network.twink.smpcleanroom.event.CleanroomRegistrationEvent;
 import network.twink.smpcleanroom.feature.impl.FilterSignFeature;
 import network.twink.smpcleanroom.feature.impl.WithholdMapFeature;
 import network.twink.smpcleanroom.util.yml.YMLParser;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 public class FeatureManager implements IFeatureManager {
@@ -17,9 +16,11 @@ public class FeatureManager implements IFeatureManager {
     public static final String VALUES_ = "values.";
     private final List<IFeature> featureRegistry;
     private static BypassManager BYPASS_MANAGER;
+    private final Logger logger;
 
     public FeatureManager(Plugin plugin, BypassManager bypassManager, CleanRoomConfiguration config) {
         if (!config.isLoaded()) throw new IllegalStateException("CleanRoomConfiguration must be loaded.");
+        this.logger = plugin.getLogger();
         YMLParser parser = config.getParser();
         BYPASS_MANAGER = bypassManager;
         featureRegistry = new ArrayList<>();
@@ -52,13 +53,6 @@ public class FeatureManager implements IFeatureManager {
             }
             registerFeature(new FilterSignFeature(plugin, defaultBannedWords));
         }
-        Bukkit.getPluginManager().callEvent(new CleanroomRegistrationEvent(this, getBypassManager()));
-    }
-
-    public void onPreStartup() {
-        for (IFeature iFeature : this.featureRegistry) {
-            iFeature.onPreStartup();
-        }
     }
 
     public void onStartup() {
@@ -80,9 +74,10 @@ public class FeatureManager implements IFeatureManager {
     @Override
     public void registerFeature(IFeature feature) {
         featureRegistry.add(feature);
+        logger.info("Registered feature: " + feature.getClass().getSimpleName() + ".class");
     }
 
-    public static BypassManager getBypassManager() {
+    public BypassManager getBypassManager() {
         return BYPASS_MANAGER;
     }
 }
