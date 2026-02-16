@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id("xyz.beengoo.run-folia") version "0.1.0"
     id("com.diffplug.spotless") version "8.1.0"
 }
 
@@ -26,14 +25,6 @@ spotless {
 dependencies {
     compileOnly("dev.folia:folia-api:1.21.8-R0.1-SNAPSHOT")
     compileOnly 'net.dmulloy2:ProtocolLib:5.4.0'
-}
-
-runFolia {
-    mcVersion.set("1.21.4")           // Folia server version to run
-    runDir.set(layout.projectDirectory.dir("run")) // Server run directory
-    jvmArgs.addAll("-Xmx8G", "-Xms8G") // JVM args
-    serverArgs.add("--nogui")        // Server launch arguments
-    agreeEula.set(true)              // Auto-accept EULA
 }
 
 def targetJavaVersion = 21
