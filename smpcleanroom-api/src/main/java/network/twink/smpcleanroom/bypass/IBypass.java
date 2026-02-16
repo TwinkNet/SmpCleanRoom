@@ -13,6 +13,6 @@ public interface IBypass {
     }
 
     default boolean isCriteriaMet(Plugin plugin, Player player) {
-        return false;
+        return isCriteriaMet(plugin, player.getLocation());
     }
 }

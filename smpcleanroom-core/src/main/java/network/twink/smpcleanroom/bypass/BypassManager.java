@@ -6,12 +6,14 @@ import network.twink.smpcleanroom.CleanRoomConfiguration;
 import network.twink.smpcleanroom.bypass.impl.JoinDateBypass;
 import network.twink.smpcleanroom.bypass.impl.PermissionBypass;
 import network.twink.smpcleanroom.bypass.impl.PlaytimeBypass;
+import network.twink.smpcleanroom.bypass.impl.SpawnRadiusBypass;
+import network.twink.smpcleanroom.feature.FeatureManager;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class BypassManager {
+public class BypassManager implements IBypassManager {
 
     private static final String BYPASSES_ = "bypasses.";
     private final List<IBypass> bypassRegistry;
@@ -25,21 +27,31 @@ public class BypassManager {
         bypassRegistry = new ArrayList<>();
         if (parser.getBoolean(BYPASSES_ + "first_join.enabled", false)) {
             long criteriaMs = parser.getLong(BYPASSES_ + "first_join.joindate_timestamp_ms");
-            bypassRegistry.add(new JoinDateBypass(criteriaMs));
+            registerBypass(new JoinDateBypass(criteriaMs));
         }
         if (parser.getBoolean(BYPASSES_ + "total_playtime.enabled", false)) {
             long criteriaTicks = parser.getLong(BYPASSES_ + "total_playtime.playtime_ticks");
-            bypassRegistry.add(new PlaytimeBypass(criteriaTicks));
+            registerBypass(new PlaytimeBypass(criteriaTicks));
         }
         if (parser.getBoolean(BYPASSES_ + "permission.enabled", false)) {
             String permission = parser.getString(BYPASSES_ + "permission.perm");
-            bypassRegistry.add(new PermissionBypass(permission));
+            registerBypass(new PermissionBypass(permission));
+        }
+        /* location */ {
+            int radius = parser.getInt(FeatureManager.VALUES_ + "spawn_radius", 5000);
+            registerBypass(new SpawnRadiusBypass(radius));
         }
         mode = Mode.valueOf(parser.getString(BYPASSES_ + "mode").toUpperCase());
     }
 
     public List<IBypass> getBypassRegistryCopy() {
         return new ArrayList<>(bypassRegistry);
+    }
+
+    @Override
+    public void registerBypass(IBypass bypass) {
+        bypassRegistry.add(bypass);
+        plugin.getLogger().info("Registered bypass: " + bypass.getClass().getSimpleName() + ".class");
     }
 
     public boolean isCriteriaMet(Player player) {
@@ -65,12 +77,14 @@ public class BypassManager {
             for (IBypass iBypass : bypassRegistry) {
                 boolean flag = iBypass.isCriteriaMet(getPlugin(), loc);
                 bool.setFlag(flag, iBypass.isImmune());
+                if (flag && iBypass.isImmune()) return flag;
             }
             return bool.getFlag();
         } else {
             boolean flag = false;
             for (IBypass iBypass : bypassRegistry) {
                 flag = iBypass.isCriteriaMet(getPlugin(), loc);
+                if (flag && iBypass.isImmune()) return flag;
             }
             return flag;
         }

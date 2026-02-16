@@ -5,13 +5,9 @@ import org.bukkit.plugin.Plugin;
 
 public interface IFeature extends Listener {
 
-    void onPreStartup();
-
     void onStartup();
 
     void onShutdown();
 
     Plugin getPlugin();
-
-    FeatureManager getFeatureManager();
 }

@@ -2,6 +2,7 @@ package network.twink.smpcleanroom.feature;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import network.twink.smpcleanroom.CleanRoomConfiguration;
 import network.twink.smpcleanroom.bypass.BypassManager;
 import network.twink.smpcleanroom.feature.impl.FilterSignFeature;
@@ -9,18 +10,19 @@ import network.twink.smpcleanroom.feature.impl.WithholdMapFeature;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.plugin.Plugin;
 
-public class FeatureManager {
+public class FeatureManager implements IFeatureManager {
 
     private static final String FEATURES_ = "features.";
-    private static final String VALUES_ = "values.";
+    public static final String VALUES_ = "values.";
     private final List<IFeature> featureRegistry;
-    private final BypassManager bypassManager;
+    private static BypassManager BYPASS_MANAGER;
+    private final Logger logger;
 
     public FeatureManager(Plugin plugin, BypassManager bypassManager, CleanRoomConfiguration config) {
         if (!config.isLoaded()) throw new IllegalStateException("CleanRoomConfiguration must be loaded.");
+        this.logger = plugin.getLogger();
         YMLParser parser = config.getParser();
-        this.bypassManager = bypassManager;
-        int radius = parser.getInt(VALUES_ + "spawn_radius", 5000);
+        BYPASS_MANAGER = bypassManager;
         featureRegistry = new ArrayList<>();
         if (parser.getBoolean(FEATURES_ + "withhold_map_feature.enabled", true)) {
             List<String> defaultMapIdBanList = new ArrayList<>();
@@ -39,16 +41,8 @@ public class FeatureManager {
             }
             boolean useNoise =
                     parser.getBoolean(FEATURES_ + "withhold_map_feature.obfuscation.obfuscate_with_noise", true);
-            featureRegistry.add(new WithholdMapFeature(
-                    this,
-                    plugin,
-                    radius,
-                    defaultMapIdBanList,
-                    withHoldAll,
-                    useAlternateMethod,
-                    replaceWithId,
-                    useNoise,
-                    replaceId));
+            registerFeature(new WithholdMapFeature(
+                    plugin, defaultMapIdBanList, withHoldAll, useAlternateMethod, replaceWithId, useNoise, replaceId));
         }
         if (parser.getBoolean(FEATURES_ + "filter_sign_feature.enabled", true)) {
             List<String> defaultBannedWords = new ArrayList<>();
@@ -57,13 +51,7 @@ public class FeatureManager {
             if (parser.exists(key)) {
                 defaultBannedWords = parser.getStringList(key);
             }
-            featureRegistry.add(new FilterSignFeature(this, plugin, defaultBannedWords, radius));
-        }
-    }
-
-    public void onPreStartup() {
-        for (IFeature iFeature : this.featureRegistry) {
-            iFeature.onPreStartup();
+            registerFeature(new FilterSignFeature(plugin, defaultBannedWords));
         }
     }
 
@@ -83,7 +71,13 @@ public class FeatureManager {
         return featureRegistry.size();
     }
 
+    @Override
+    public void registerFeature(IFeature feature) {
+        featureRegistry.add(feature);
+        logger.info("Registered feature: " + feature.getClass().getSimpleName() + ".class");
+    }
+
     public BypassManager getBypassManager() {
-        return bypassManager;
+        return BYPASS_MANAGER;
     }
 }

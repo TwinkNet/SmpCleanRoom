@@ -25,8 +25,6 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import network.twink.smpcleanroom.CompliantCleanRoom;
 import network.twink.smpcleanroom.feature.AbstractFeature;
-import network.twink.smpcleanroom.feature.FeatureManager;
-import network.twink.smpcleanroom.util.LocationUtil;
 import network.twink.smpcleanroom.util.SerializableRedactionData;
 import network.twink.smpcleanroom.util.yml.YMLParser;
 import org.bukkit.Bukkit;
@@ -51,7 +49,6 @@ import org.jetbrains.annotations.Nullable;
 public class WithholdMapFeature extends AbstractFeature {
 
     private ProtocolManager protocolManager;
-    private final int radius;
     private final boolean withholdAll;
     private final boolean useAlternateMethod;
     private final boolean replaceWithIdWheneverPossible;
@@ -62,19 +59,16 @@ public class WithholdMapFeature extends AbstractFeature {
     private SerializableRedactionData savedRedactionData;
 
     public WithholdMapFeature(
-            FeatureManager featureManager,
             Plugin plugin,
-            int radius,
             List<String> bannedHashes,
             boolean withholdAll,
             boolean useAlternateMethod,
             boolean replaceWithIdWheneverPossible,
             boolean replaceWithNoise,
             int replacementId) {
-        super(featureManager, plugin, "withhold_map_feature");
+        super(plugin, "withhold_map_feature");
         this.bannedHashes = bannedHashes;
         this.withholdAll = withholdAll;
-        this.radius = radius;
         this.replaceWithNoise = replaceWithNoise;
         this.useAlternateMethod = useAlternateMethod;
         this.replaceWithIdWheneverPossible = replaceWithIdWheneverPossible;
@@ -83,9 +77,6 @@ public class WithholdMapFeature extends AbstractFeature {
             getPlugin().getLogger().info("Will try to render map_" + replacementId + ".dat on banned maps.");
         }
     }
-
-    @Override
-    public void onPreStartup() {}
 
     @Override
     public void onStartup() {
@@ -518,15 +509,11 @@ public class WithholdMapFeature extends AbstractFeature {
         }
 
         public void banThisMap(@NotNull MapView map, @NotNull MapCanvas canvas, @NotNull Player player) {
-            if (!LocationUtil.isLocationInsideSpawnRadius(player.getLocation(), WithholdMapFeature.this.radius)) {
+            if (CompliantCleanRoom.getFeatureManager().getBypassManager().isCriteriaMet(player)) {
                 unbanThisMap(canvas);
                 return;
             }
-            if (getFeatureManager().getBypassManager().isCriteriaMet(player)) {
-                unbanThisMap(canvas);
-                return;
-            }
-            if (getFeatureManager().getBypassManager().isCriteriaMet(player.getLocation())) {
+            if (CompliantCleanRoom.getFeatureManager().getBypassManager().isCriteriaMet(player.getLocation())) {
                 unbanThisMap(canvas);
                 return;
             }
