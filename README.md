@@ -1,10 +1,12 @@
 # CompliantCleanRoom
 
 ## Download (for Folia 1.21.x)
-[Release Candidate RC-2026.01.26 is out!](https://github.com/TwinkNet/SmpCleanRoom/releases/tag/RC-2026.01.26)
-This release candidate is ready to go. It has been tested throughly on a small server with several players. If an issue is noticed, make an issue on this page and remove the plugin from your server if it is causing critical playability issues or not being effective.
+[Release Candidate RC-2026.02.15 is out!](https://github.com/TwinkNet/SmpCleanRoom/releases/tag/RC-2026.02.15)
+This release candidate is ready to go. It includes a lot of behind the scenes changes that incorporates a new API that will be used to expand what features are available.
 
 I do not intend to target non-Folia Paper at this time unless there is a demand. You should be using Folia over Paper if you run a server that needs a plugin like this.
+
+To install, download the `smpcleanroom-core-RC-XXXX.XX.XX-all.jar` jarfile and place in your `plugins/` directory.
 
 [Default config.yml and documentation](https://github.com/TwinkNet/SmpCleanRoom/blob/master/src/main/resources/config.yml)
 
