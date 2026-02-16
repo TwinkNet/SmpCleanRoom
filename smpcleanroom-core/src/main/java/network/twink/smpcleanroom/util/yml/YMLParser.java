@@ -504,7 +504,7 @@ public class YMLParser {
     }
 
     /**
-     * @deprecated use {@link #get(String, T)} instead
+     * @deprecated use {@link #get(String)} instead
      */
     @Deprecated
     public <T> T getNested(String key, T defaultValue) {
