@@ -19,12 +19,8 @@ public class CompliantCleanRoomAdapter {
     private Class<?> cachedPluginClass = null;
 
     /**
-     * You shouldn't actually need to use this, you can obtain the
-     * BypassManager from CleanroomPostRegistrationEvent
-     *
      * @return The BypassManager in the core plugin.
      */
-    @Deprecated
     public IBypassManager getBypassManager() {
         try {
             if (cachedBypassManager != null) return cachedBypassManager;
@@ -42,12 +38,8 @@ public class CompliantCleanRoomAdapter {
     }
 
     /**
-     * You shouldn't actually need to use this, you can obtain the
-     * FeatureManager from CleanroomPostRegistrationEvent
-     *
      * @return The FeatureManager in the core plugin.
      */
-    @Deprecated
     public IFeatureManager getFeatureManager() {
         try {
             if (cachedFeatureManager != null) return cachedFeatureManager;
