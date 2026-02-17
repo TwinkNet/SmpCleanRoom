@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'network.twink'
-version = 'API-2026.02.15'
+version = 'API-2026.02.17'
 
 repositories {
     mavenCentral()

@@ -15,7 +15,10 @@ import org.jetbrains.annotations.NotNull;
  * by this event into a field, because this is your only opportunity
  * to obtain these objects without using {@link network.twink.smpcleanroom.CompliantCleanRoomAdapter},
  * which relies on Reflection.
+ *
+ * Deprecated: It doesn't work how I intended it to.
  */
+@Deprecated
 public class CleanroomRegistrationEvent extends org.bukkit.event.Event {
 
     private static final HandlerList HANDLER_LIST = new HandlerList();
